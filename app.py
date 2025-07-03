@@ -30,26 +30,24 @@ if not this_week.empty:
     special = str(row.get("Special events", "")).lower()
 
     intros = [
-        "Hope your week’s going well!",
-        "Excited for another Thursday run?",
-        "Lace up — here’s what we’ve got planned!",
-        "Looking forward to another great evening together!",
-        "Let’s make this week’s run another good one!"
+        "👋 Let’s get together for another great Thursday run!",
+        "🏃‍♂️ Time for another outing with the RTR crew!",
+        "🗓️ Thursday’s nearly here – and so is this week’s route!",
+        "🌟 Another week, another chance to move, chat, and feel good!"
     ]
 
     signoffs = [
-        "See you Thursday! 👟",
-        "Can’t wait to run with you all!",
-        "Bring the energy and let’s go!",
-        "Let’s make it count!",
-        "Keep running strong!"
+        "Bring good vibes — and we’ll see you out there! 👟",
+        "Let’s make it a good one — you in? 💪",
+        "Running + good company = best way to spend a Thursday!",
+        "Bring a friend, bring your energy — let’s go! 🏃‍♀️"
     ]
 
     intro = random.choice(intros)
     signoff = random.choice(signoffs)
 
-    safety_msg = "🔦 Please bring a headtorch and wear hi-vis — we’ll be running after dark." if "dark" in notes else ""
-    social_msg = "🍻 After the run, we’re heading to the market for drinks and food. Join us!" if "social" in special else ""
+    safety_msg = "🔦 Don’t forget your hi-vis and headtorch — we want you glowing for all the right reasons!" if "dark" in notes else ""
+    social_msg = "🍻 Fancy a pint? We’re heading to the market after for food and drinks!" if "social" in special else ""
 
     route_lines = []
     if pd.notna(route_8k):
@@ -62,17 +60,17 @@ if not this_week.empty:
             route_lines.append(f"🔗 {link_5k}")
     routes_text = "\n".join(route_lines) if route_lines else "[No route info available]"
 
-    footer = """📲 Please book on ASAP here:
+    footer = """📲 Book on when you can:
 https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
 
-❌ Can’t make it? Cancel at least 1 hour before:
+❌ Can’t make it? Just cancel with 1 hour’s notice:
 https://groups.runtogether.co.uk/My/BookedRuns"""
 
-    full_message = f"""👋 {intro}
+    full_message = f"""{intro}
 
-📍 We’re meeting at {meeting_point}  
+📍 Meeting at: {meeting_point}  
 {routes_text}  
-🕖 Start time: 7:00pm
+🕖 We’ll be setting off at 7:00pm sharp
 
 {safety_msg}
 {social_msg}
@@ -84,4 +82,4 @@ else:
     full_message = "⚠️ No route found for next Thursday. Please check the schedule."
 
 st.subheader("📧 Weekly Email / Social Message")
-st.text_area("Generated Message", value=full_message, height=400)
+st.text_area("Generated Message", value=full_message, height=420)
