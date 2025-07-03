@@ -22,8 +22,8 @@ this_week = df[df["Date"] == next_thursday]
 if not this_week.empty:
     row = this_week.iloc[0]
     meeting_point = row.get("Meeting point", "[missing meeting point]")
-    route_8k = row.get("8k Route", "[missing 8k route]")
-    route_5k = row.get("5k Route", "[missing 5k route]")
+    route_8k = row.get("8k Route")
+    route_5k = row.get("5k Route")
     notes = str(row.get("Notes", "")).lower()
     special = str(row.get("Special events", "")).lower()
 
@@ -49,6 +49,13 @@ if not this_week.empty:
     safety_msg = "🔦 Please bring a headtorch and wear hi-vis — we’ll be running after dark." if "dark" in notes else ""
     social_msg = "🍻 After the run, we’re heading to the market for drinks and food. Join us!" if "social" in special else ""
 
+    route_lines = []
+    if pd.notna(route_8k):
+        route_lines.append(f"🛣️ 8k Route: {route_8k}")
+    if pd.notna(route_5k):
+        route_lines.append(f"🏃 5k Route: {route_5k}")
+    routes_text = "\n".join(route_lines) if route_lines else "[No route info available]"
+
     footer = """📲 Please book on ASAP here:
 https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
 
@@ -58,8 +65,7 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
     full_message = f"""👋 {intro}
 
 📍 We’re meeting at {meeting_point}  
-🛣️ 8k Route: {route_8k}  
-🏃 5k Route: {route_5k}  
+{routes_text}  
 🕖 Start time: 7:00pm
 
 {safety_msg}
