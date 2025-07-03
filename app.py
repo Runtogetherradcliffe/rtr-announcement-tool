@@ -35,11 +35,7 @@ if not this_week.empty:
     notes = str(row.get("Notes", "")).lower()
     special = str(row.get("Special events", "")).lower()
 
-    friendly_intro = random.choice([
-        "👋 Hope you're having a great week! Here's what we’ve got planned for Thursday...",
-        "🙌 It’s almost Thursday – here’s what’s coming up with the RTR crew!",
-        "👟 Another week, another fun route with great company. Here’s what to expect:"
-    ])
+    intro = "👋 Hope you're having a great week! Here's what we’ve got planned for Thursday..."
 
     tour_msg = ""
     gmaps_line = ""
@@ -51,49 +47,28 @@ if not this_week.empty:
     location_line = f"📍 Meeting at: {meeting_point}" if meeting_point else ""
     time_line = "🕖 Set off time: 7:00pm"
 
-    route_section = "As usual we’ve got 2 route options this week.\n"
+    route_lines = ["As usual we’ve got 2 route options this week."]
     if link_8k:
-        route_section += f"8k: 🔗 {link_8k}\n"
+        route_lines.append(f"The 8k route is 🔗 {link_8k}")
     if link_5k:
-        route_section += f"5k: 🔗 {link_5k} (run or ‘Jeff’ run/walk option)"
+        route_lines.append(f"The 5k Route is 🔗 {link_5k} and you have the option to do this as a run or ‘Jeff’ (which is run / walk intervals)")
+    route_section = "\n".join(route_lines)
 
-    additional_msgs = []
+    extra_lines = []
     if "dark" in notes:
-        additional_msgs.append("🔦 Bring your hi-vis and headtorch – it’ll be dark!")
+        extra_lines.append("🔦 Bring your hi-vis and headtorch – it’ll be dark!")
     if "social" in special:
-        additional_msgs.append("🍻 Social after the run – drinks and food at the market!")
+        extra_lines.append("🍻 Social after the run – drinks and food at the market!")
+    extra_msg = "\n".join(extra_lines)
 
     footer = """📲 Book on here:
 https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
 ❌ Need to cancel? Please do so at least 1 hour before:
 https://groups.runtogether.co.uk/My/BookedRuns"""
 
-    signoff = random.choice([
-        "See you out there! 👟",
-        "Let’s make it a good one! 💪",
-        "Tag your run buddies and get booked in! 🏃"
-    ])
+    signoff = "Let’s make it a good one! 💪"
 
-    # Email format
-    email_msg = f"""{friendly_intro}
-
-{tour_msg}
-{location_line}
-{gmaps_line}
-{time_line}
-
-As usual we have 2 routes for you this week.  
-The 8k route is 🔗 {link_8k}  
-The 5k Route is 🔗 {link_5k} and you have the option to do this as a run or ‘Jeff’ (which is run / walk intervals)
-
-{"\n".join(additional_msgs)}
-
-{footer}
-
-{signoff}"""
-
-    # Facebook format
-    facebook_msg = f"""📣 {friendly_intro}
+    message = f"""{intro}
 
 {tour_msg}
 {location_line}
@@ -102,36 +77,14 @@ The 5k Route is 🔗 {link_5k} and you have the option to do this as a run or �
 
 {route_section}
 
-{"\n".join(additional_msgs)}
-
-{footer}
-
-{signoff}"""
-
-    # WhatsApp format
-    whatsapp_msg = f"""*RunTogether Radcliffe – This Thursday*
-
-{tour_msg}
-{location_line}
-{gmaps_line}
-{time_line}
-
-{route_section}
-
-{"\n".join(additional_msgs)}
+{extra_msg}
 
 {footer}
 
 {signoff}"""
 
 else:
-    email_msg = facebook_msg = whatsapp_msg = "⚠️ No route found for selected date. Please check the schedule."
+    message = "⚠️ No route found for selected date. Please check the schedule."
 
-st.subheader("📧 Email Message")
-st.text_area("Email", value=email_msg, height=420)
-
-st.subheader("📱 Facebook / Instagram Post")
-st.text_area("Facebook / Instagram", value=facebook_msg, height=400)
-
-st.subheader("💬 WhatsApp Message")
-st.text_area("WhatsApp", value=whatsapp_msg, height=400)
+st.subheader("📧 Weekly Message Preview (Full URLs)")
+st.text_area("Generated Message", value=message, height=450)
