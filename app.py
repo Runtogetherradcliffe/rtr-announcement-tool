@@ -17,7 +17,6 @@ def load_schedule():
 df = load_schedule()
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
-
 available_dates = df["Date"].dropna().sort_values().unique().tolist()
 default_index = available_dates.index(next_thursday) if next_thursday in available_dates else 0
 selected_date = st.selectbox("Select run date:", available_dates, index=default_index)
@@ -35,7 +34,12 @@ if not this_week.empty:
     notes = str(row.get("Notes", "")).lower()
     special = str(row.get("Special events", "")).lower()
 
-    intro = "👋 Hope you're having a great week! Here's what we’ve got planned for Thursday..."
+    intro = random.choice([
+        "👋 Ready for another great Thursday with the RTR crew?",
+        "🌟 It’s nearly time to lace up! Here's what we’ve got planned:",
+        "🙌 Good vibes, good routes – here’s what’s coming up this week:",
+        "👟 Thursday is calling – check out this week’s plan!"
+    ])
 
     tour_msg = ""
     gmaps_line = ""
@@ -45,31 +49,31 @@ if not this_week.empty:
             gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
 
     location_line = f"📍 Meeting at: {meeting_point}" if meeting_point else ""
-    time_line = "🕖 Set off time: 7:00pm"
+    time_line = "🕖 We set off at 7:00pm sharp – don’t be late!"
 
-    route_lines = ["As usual we’ve got 2 route options this week."]
+    route_lines = ["This week we’ve got two route options to choose from:"]
     if link_8k:
-        route_lines.append(f"The 8k route is 🔗 {link_8k}")
+        route_lines.append(f"• 8k route: {link_8k}")
     if link_5k:
-        route_lines.append(f"The 5k Route is 🔗 {link_5k} and you have the option to do this as a run or ‘Jeff’ (which is run / walk intervals)")
+        route_lines.append(f"• 5k route: {link_5k} (or do it as a Jeff – run/walk style!)")
     route_section = "\n".join(route_lines)
 
     extra_lines = []
     if "dark" in notes:
-        extra_lines.append("🔦 Bring your hi-vis and headtorch – it’ll be dark!")
+        extra_lines.append("🔦 Don’t forget your hi-vis and headtorch – we’ll be running after dark.")
     if "social" in special:
-        extra_lines.append("🍻 Social after the run – drinks and food at the market!")
+        extra_lines.append("🍻 After the run, we’re heading out for drinks and food – come along!")
     extra_msg = "\n".join(extra_lines)
 
-    footer = """\n📲 Book on here:
+    footer = """📲 Book now:
 https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
-❌ Need to cancel? Please do so at least 1 hour before:
+❌ Can’t make it? Cancel at least 1 hour before:
 https://groups.runtogether.co.uk/My/BookedRuns"""
 
     signoff = random.choice([
-        "See you out there! 👟",
-        "Let’s make it a good one! 💪",
-        "Tag your run buddies and get booked in! 🏃"
+        "Looking forward to seeing you there! 🎉",
+        "Grab your shoes, bring your smiles – see you Thursday! 👟",
+        "Bring the energy – we’ve got a great one lined up! 💥"
     ])
 
     email_msg = f"""{intro}
@@ -120,11 +124,10 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 else:
     email_msg = facebook_msg = whatsapp_msg = "⚠️ No route found for selected date. Please check the schedule."
 
-st.subheader("📧 Email Message")
-st.text_area("Email", value=email_msg, height=420)
+def copy_button(label, content):
+    st.text_area(f"{label} Message", value=content, height=300)
+    st.download_button(f"📋 Copy {label} text", content, file_name=f"{label.lower()}_message.txt")
 
-st.subheader("📱 Facebook / Instagram Post")
-st.text_area("Facebook / Instagram", value=facebook_msg, height=400)
-
-st.subheader("💬 WhatsApp Message")
-st.text_area("WhatsApp", value=whatsapp_msg, height=400)
+copy_button("Email", email_msg)
+copy_button("Facebook", facebook_msg)
+copy_button("WhatsApp", whatsapp_msg)
