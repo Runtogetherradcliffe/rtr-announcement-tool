@@ -1,98 +1,121 @@
 
 import streamlit as st
 import pandas as pd
-from datetime import datetime, timedelta
 import random
+from datetime import datetime
 
-st.set_page_config(page_title="RTR Weekly Announcement Generator", layout="centered")
-st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Announcement Generator")
+st.title("RunTogether Radcliffe – Weekly Run Announcement Generator")
 
-@st.cache_data
-def load_schedule():
-    df = pd.read_excel("RTR route schedule.xlsx", sheet_name=0)
-    df.columns = df.columns.str.strip()
-    df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
-    return df
+# Load from pre-included schedule
+df = pd.read_excel("RTR route schedule.xlsx", sheet_name="schedule")
+df = df.drop(columns=["C25K week", "C25K link"], errors="ignore")
+df["2025 Date"] = pd.to_datetime(df["2025 Date"], errors="coerce")
 
-df = load_schedule()
+trail_phrases = [
+    "We’re exploring the wonderful trails around Radcliffe this week — a great way to enjoy the local scenery on the move!",
+    "Join us for a scenic route through some of Radcliffe’s finest trails — soft underfoot and full of charm.",
+    "It’s trail time! Get ready for a fun, varied route with great views and good company.",
+    "This week we hit the trails — the perfect way to mix up the pace and enjoy the outdoors.",
+    "Trail lovers, this one’s for you — come enjoy some of our favourite off-road paths!"
+]
+
+road_phrases = [
+    "We’re sticking to well-lit roads this week — don’t forget your hi-vis and head torch!",
+    "A night-time road run awaits — be safe, be seen, and join us for a steady evening loop.",
+    "We’ll be keeping it simple on the streets this week — bring your lights and let’s go!",
+    "We’re heading out on a steady road route this week — great for pacing and winter fitness!",
+    "Expect smooth tarmac and streetlights this week — just remember your hi-vis and lights!"
+]
+
+sign_offs = [
+    "See you Thursday!",
+    "Looking forward to running with you Thursday!",
+    "Happy running – see you soon!",
+    "Bring your head torch and a smile!",
+    "Let’s make it a good one!"
+]
+
+
 today = datetime.today().date()
-next_thursday = today + timedelta((3 - today.weekday()) % 7)
+future_dates = sorted(df[df["2025 Date"].dt.date >= today]["2025 Date"].dt.date.unique())
+selected_date = st.selectbox("Select the run date:", future_dates, index=0)
 
-available_dates = df["Date"].dropna().sort_values().unique().tolist()
-default_index = available_dates.index(next_thursday) if next_thursday in available_dates else 0
-selected_date = st.selectbox("Select run date:", available_dates, index=default_index)
 
-this_week = df[df["Date"] == selected_date]
+row = df[df["2025 Date"].dt.date == selected_date].iloc[0]
+date_str = row["2025 Date"].strftime("%A %d %B %Y")
+meeting_point = row["Meeting point"]
+notes = row["Notes"] or ""
+special_event = str(row["Special events"]).lower() if pd.notna(row["Special events"]) else ""
+route_8k = f"{row['8k Route']} ({row['8k Strava link']})"
+route_5k = f"{row['5k Route']} ({row['5k Strava link']})"
 
-if not this_week.empty:
-    row = this_week.iloc[0]
-    meeting_point = row.get("Meeting point", "[missing meeting point]")
-    gmaps_link = row.get("Meeting point google link", "")
-    route_8k = row.get("8k Route", "")
-    route_5k = row.get("5k Route", "")
-    link_8k = row.get("8k Strava link", "")
-    link_5k = row.get("5k Strava link", "")
-    notes = str(row.get("Notes", "")).lower()
-    special = str(row.get("Special events", "")).lower()
-
-    intro = "👋 Hope you're having a great week! Here's what we’ve got planned for Thursday..."
-
-    tour_msg = ""
-    gmaps_line = ""
-    if "radcliffe market" not in meeting_point.lower():
-        tour_msg = "🚌 We’re on tour this week – meeting somewhere different!"
-        if pd.notna(gmaps_link):
-            gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
-
-    location_line = f"📍 Meeting at: {meeting_point}" if meeting_point else ""
-    time_line = "🕖 Set off time: 7:00pm"
-
-    route_lines = ["As usual we’ve got 2 route options this week."]
-    if link_8k:
-        route_lines.append(f"The 8k route is 🔗 {link_8k}")
-    if link_5k:
-        route_lines.append(f"The 5k Route is 🔗 {link_5k} and you have the option to do this as a run or ‘Jeff’ (which is run / walk intervals)")
-    route_section = "\n".join(route_lines)
-
-    extra_lines = []
-    if "dark" in notes:
-        extra_lines.append("🔦 Bring your hi-vis and headtorch – it’ll be dark!")
-    if "social" in special:
-        extra_lines.append("🍻 Social after the run – drinks and food at the market!")
-    extra_msg = "\n".join(extra_lines)
-
-    footer = """📲 Book on here:
-https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
-❌ Need to cancel? Please do so at least 1 hour before:
-https://groups.runtogether.co.uk/My/BookedRuns"""
-
-    signoff = "Let’s make it a good one! 💪"
-
-    message = f"""{intro}
-
-{tour_msg}
-{location_line}
-{gmaps_line}
-{time_line}
-
-{route_section}
-
-{extra_msg}
-
-{footer}
-
-{signoff}"""
-
+if "trail" in notes.lower():
+    note_msg = random.choice(trail_phrases)
+elif "dark" in notes.lower():
+    note_msg = random.choice(road_phrases) + "\n\nIf you’re able to join us, please ensure you have your lights with you and wear hi-vis clothing."
 else:
-    message = "⚠️ No route found for selected date. Please check the schedule."
+    note_msg = notes
 
-st.subheader("📧 Weekly Message Preview (Full URLs)")
+social_msg = ""
+if "social" in special_event:
+    social_msg = "After the run, many of us are going for drinks and food at the market, so it should be a nice social occasion."
 
-st.text_area("Email", value=message, height=420)
+sign_off = random.choice(sign_offs)
 
-st.subheader("📱 Facebook / Instagram Post")
-st.text_area("Facebook / Instagram", value=message, height=400)
+email_msg = f"""Subject: This Week’s Run – {date_str}
+
+Join us this Thursday for our weekly RunTogether Radcliffe group run!
+
+📍 Meeting point: {meeting_point}
+🕖 Time: 7:00pm start
+
+You can choose between:
+- 🛣️ 8k route: {route_8k}
+- 🏃 5k route: {route_5k}
+
+{note_msg}
+{social_msg}
+
+📲 Please book on ASAP here:
+https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
+
+❌ Can’t make it? Cancel at least 1 hour before:
+https://groups.runtogether.co.uk/My/BookedRuns
+
+{sign_off}"""
+
+fb_msg = f"""📣 RunTogether Radcliffe – Thursday {date_str}
+
+📍 {meeting_point}
+🕖 7pm start
+
+8k: {row['8k Route']}
+https://www.strava.com/routes/{row['8k Strava link'].split('/')[-1]}
+
+5k: {row['5k Route']}
+https://www.strava.com/routes/{row['5k Strava link'].split('/')[-1]}
+
+{note_msg}
+{social_msg}
+
+📲 Book now: https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs"""
+
+wa_msg = f"""🏃 Thursday {date_str} – RunTogether Radcliffe!
+
+📍 {meeting_point} | 7pm
+
+8k: {row['8k Route']}
+5k: {row['5k Route']}
+
+{note_msg}
+
+📲 Book: https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs"""
+
+st.subheader("📧 Email Message")
+st.text_area("Email:", value=email_msg, height=300)
+
+st.subheader("📱 Facebook Caption")
+st.text_area("Facebook:", value=fb_msg, height=250)
 
 st.subheader("💬 WhatsApp Message")
-st.text_area("WhatsApp", value=message, height=400)
-
+st.text_area("WhatsApp:", value=wa_msg, height=250)
