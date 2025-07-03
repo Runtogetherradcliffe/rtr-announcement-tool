@@ -77,48 +77,34 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
     ])
 
     email_msg = f"""{intro}
-
 {tour_msg}
 {location_line}
 {gmaps_line}
 {time_line}
-
 {route_section}
-
 {extra_msg}
-
 {footer}
-
 {signoff}"""
 
     facebook_msg = f"""📣 {intro}
-
 {tour_msg}
 {location_line}
 {gmaps_line}
 {time_line}
-
 {route_section}
-
 {extra_msg}
-
 {footer}
 
 👍 {signoff}"""
 
     whatsapp_msg = f"""*RunTogether Radcliffe – This Thursday!*
-
 {tour_msg}
 {location_line}
 {gmaps_line}
 {time_line}
-
 {route_section}
-
 {extra_msg}
-
 {footer}
-
 {signoff}"""
 
 else:
