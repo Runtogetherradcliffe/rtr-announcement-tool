@@ -87,4 +87,12 @@ else:
     message = "⚠️ No route found for selected date. Please check the schedule."
 
 st.subheader("📧 Weekly Message Preview (Full URLs)")
-st.text_area("Generated Message", value=message, height=450)
+
+st.text_area("Email", value=message, height=420)
+
+st.subheader("📱 Facebook / Instagram Post")
+st.text_area("Facebook / Instagram", value=message, height=400)
+
+st.subheader("💬 WhatsApp Message")
+st.text_area("WhatsApp", value=message, height=400)
+
