@@ -66,7 +66,7 @@ https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
 ❌ Can’t make it? Just cancel with 1 hour’s notice:
 https://groups.runtogether.co.uk/My/BookedRuns"""
 
-    full_message = f"""{intro}
+    email_msg = f"""{intro}
 
 📍 Meeting at: {meeting_point}  
 {routes_text}  
@@ -78,8 +78,40 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 {footer}
 
 {signoff}"""
-else:
-    full_message = "⚠️ No route found for next Thursday. Please check the schedule."
 
-st.subheader("📧 Weekly Email / Social Message")
-st.text_area("Generated Message", value=full_message, height=420)
+    facebook_msg = f"""📣 {intro}
+
+📍 {meeting_point}  
+{routes_text}  
+🕖 7pm start
+
+{safety_msg}
+{social_msg}
+
+{footer}
+
+{signoff}"""
+
+    whatsapp_msg = f"""*RunTogether Radcliffe – This Thursday*
+
+📍 {meeting_point}  
+{routes_text}  
+🕖 7pm
+
+{safety_msg}
+{social_msg}
+
+{footer}
+
+{signoff}"""
+else:
+    email_msg = facebook_msg = whatsapp_msg = "⚠️ No route found for next Thursday. Please check the schedule."
+
+st.subheader("📧 Weekly Email Message")
+st.text_area("Email Text", value=email_msg, height=350)
+
+st.subheader("📱 Facebook / Instagram Post")
+st.text_area("Facebook / Instagram Text", value=facebook_msg, height=300)
+
+st.subheader("💬 WhatsApp Message")
+st.text_area("WhatsApp Text", value=whatsapp_msg, height=300)
