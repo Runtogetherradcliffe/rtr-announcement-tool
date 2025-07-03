@@ -11,11 +11,11 @@ st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Announcement Genera
 def load_schedule():
     df = pd.read_excel("RTR route schedule.xlsx", sheet_name=0)
     df.columns = df.columns.str.strip()
-    df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce")
+    df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
     return df
 
 df = load_schedule()
-today = datetime.today()
+today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
 this_week = df[df["Date"] == next_thursday]
 
