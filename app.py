@@ -24,6 +24,8 @@ if not this_week.empty:
     meeting_point = row.get("Meeting point", "[missing meeting point]")
     route_8k = row.get("8k Route")
     route_5k = row.get("5k Route")
+    link_8k = row.get("8k Strava link")
+    link_5k = row.get("5k Strava link")
     notes = str(row.get("Notes", "")).lower()
     special = str(row.get("Special events", "")).lower()
 
@@ -52,8 +54,12 @@ if not this_week.empty:
     route_lines = []
     if pd.notna(route_8k):
         route_lines.append(f"🛣️ 8k Route: {route_8k}")
+        if pd.notna(link_8k):
+            route_lines.append(f"🔗 {link_8k}")
     if pd.notna(route_5k):
         route_lines.append(f"🏃 5k Route: {route_5k}")
+        if pd.notna(link_5k):
+            route_lines.append(f"🔗 {link_5k}")
     routes_text = "\n".join(route_lines) if route_lines else "[No route info available]"
 
     footer = """📲 Please book on ASAP here:
