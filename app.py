@@ -76,23 +76,16 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
         "Bring the energy – we’ve got a great one lined up! 💥"
     ])
 
-    email_msg = f"""{intro}
-{tour_msg}
+    email_msg = f"""{intro}\n\n{tour_msg}
 {location_line}
 {gmaps_line}
-{time_line}
-{route_section}
-{extra_msg}
-{footer}
-{signoff}"""
+{time_line}\n\n{route_section}\n\n{extra_msg}
+{footer}\n\n{signoff}"""
 
-    facebook_msg = f"""📣 {intro}
-{tour_msg}
+    facebook_msg = f"""📣 {intro}\n\n{tour_msg}
 {location_line}
 {gmaps_line}
-{time_line}
-{route_section}
-{extra_msg}
+{time_line}\n\n{route_section}\n\n{extra_msg}
 {footer}
 
 👍 {signoff}"""
@@ -101,11 +94,8 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 {tour_msg}
 {location_line}
 {gmaps_line}
-{time_line}
-{route_section}
-{extra_msg}
-{footer}
-{signoff}"""
+{time_line}\n\n{route_section}\n\n{extra_msg}
+{footer}\n\n{signoff}"""
 
 else:
     email_msg = facebook_msg = whatsapp_msg = "⚠️ No route found for selected date. Please check the schedule."
