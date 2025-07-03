@@ -35,8 +35,11 @@ sign_offs = [
     "Let’s make it a good one!"
 ]
 
-dates = df["2025 Date"].dropna().dt.date.unique()
-selected_date = st.selectbox("Select the run date:", sorted(dates))
+
+today = datetime.today().date()
+future_dates = sorted(df[df["2025 Date"].dt.date >= today]["2025 Date"].dt.date.unique())
+selected_date = st.selectbox("Select the run date:", future_dates, index=0)
+
 
 row = df[df["2025 Date"].dt.date == selected_date].iloc[0]
 date_str = row["2025 Date"].strftime("%A %d %B %Y")
