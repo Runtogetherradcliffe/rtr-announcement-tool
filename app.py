@@ -27,7 +27,7 @@ this_week = df[df["Date"] == selected_date]
 if not this_week.empty:
     row = this_week.iloc[0]
     meeting_point = row.get("Meeting point", "[missing meeting point]")
-    gmaps_link = row.get("Google Maps link", "")
+    gmaps_link = row.get("Meeting point google link", "")
     route_8k = row.get("8k Route", "")
     route_5k = row.get("5k Route", "")
     link_8k = row.get("8k Strava link", "")
