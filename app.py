@@ -10,9 +10,9 @@ st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Announcement Genera
 # Load schedule
 @st.cache_data
 def load_schedule():
-    df = pd.read_excel("RTR route schedule.xlsx", sheet_name="schedule")
+    df = pd.read_excel("RTR route schedule.xlsx", sheet_name=0)
     df.columns = df.columns.str.strip()
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
+    df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce")
     return df
 
 df = load_schedule()
@@ -24,29 +24,18 @@ this_week = df[df["Date"] == next_thursday]
 
 if not this_week.empty:
     row = this_week.iloc[0]
-    location = row["Location"] if pd.notna(row["Location"]) else None
-    is_trail = "trail" in str(row["Surface"]).lower()
+    location = row["Meeting point"] if pd.notna(row["Meeting point"]) else None
     is_dark = next_thursday.month in [10, 11, 12, 1, 2, 3]
-    is_social = pd.notna(row.get("Social"))
 
     if location:
-        # Friendly phrasing variations
-        trail_phrases = [
-            f"We're heading out on the trails around {location} 🌿.",
-            f"This week we’ll be exploring the beautiful paths near {location}.",
-            f"Join us for a scenic trail run through {location}!"
+        phrases = [
+            f"We're heading out from {location} this Thursday evening!",
+            f"This week we’ll be meeting at {location} for our run.",
+            f"Our run starts from {location} this week — hope you can join us!",
         ]
-        road_phrases = [
-            f"We’re running from {location} this week — perfect for a solid road loop.",
-            f"This Thursday’s route starts at {location} – join us for a great evening run!",
-            f"Our run this week is from {location}. Come along and stretch those legs!"
-        ]
-
-        intro = random.choice(trail_phrases if is_trail else road_phrases)
+        intro = random.choice(phrases)
 
         safety_msg = "Please wear hi-vis and bring a headtorch 🔦" if is_dark else ""
-        social_msg = "After the run, many of us are going for drinks and food at the market — it’ll be a nice social evening! 🍻" if is_social else ""
-
         footer = """📲 Please book on ASAP here:
 https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
 
@@ -65,8 +54,6 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 
 {("🔦 " + safety_msg) if safety_msg else ""}
 
-{social_msg}
-
 {footer}
 
 {random.choice(signoffs)}"""
@@ -76,8 +63,6 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 {intro}
 
 {safety_msg if safety_msg else ""}
-
-{social_msg}
 
 📍 *{location}*
 🕖 7pm start
