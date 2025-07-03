@@ -4,10 +4,12 @@ import pandas as pd
 import random
 from datetime import datetime
 
-# Load schedule
+st.title("RunTogether Radcliffe – Weekly Run Announcement Generator")
+
+# Load from pre-included schedule
 df = pd.read_excel("RTR route schedule.xlsx", sheet_name="schedule")
-df = df.drop(columns=["C25K week", "C25K link"])
-df["2025 Date"] = pd.to_datetime(df["2025 Date"])
+df = df.drop(columns=["C25K week", "C25K link"], errors="ignore")
+df["2025 Date"] = pd.to_datetime(df["2025 Date"], errors="coerce")
 
 trail_phrases = [
     "We’re exploring the wonderful trails around Radcliffe this week — a great way to enjoy the local scenery on the move!",
@@ -26,20 +28,17 @@ road_phrases = [
 ]
 
 sign_offs = [
-    "See you Wednesday!",
-    "Happy running!",
-    "We look forward to seeing you there!",
+    "See you Thursday!",
+    "Looking forward to running with you Thursday!",
+    "Happy running – see you soon!",
     "Bring your head torch and a smile!",
     "Let’s make it a good one!"
 ]
-
-st.title("RunTogether Radcliffe – Weekly Run Announcement Generator")
 
 dates = df["2025 Date"].dropna().dt.date.unique()
 selected_date = st.selectbox("Select the run date:", sorted(dates))
 
 row = df[df["2025 Date"].dt.date == selected_date].iloc[0]
-
 date_str = row["2025 Date"].strftime("%A %d %B %Y")
 meeting_point = row["Meeting point"]
 notes = row["Notes"] or ""
@@ -82,4 +81,38 @@ https://groups.runtogether.co.uk/My/BookedRuns
 
 {sign_off}"""
 
-st.text_area("Generated Email Message:", value=email_msg, height=400)
+fb_msg = f"""📣 RunTogether Radcliffe – Thursday {date_str}
+
+📍 {meeting_point}
+🕖 7pm start
+
+8k: {row['8k Route']}
+https://www.strava.com/routes/{row['8k Strava link'].split('/')[-1]}
+
+5k: {row['5k Route']}
+https://www.strava.com/routes/{row['5k Strava link'].split('/')[-1]}
+
+{note_msg}
+{social_msg}
+
+📲 Book now: https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs"""
+
+wa_msg = f"""🏃 Thursday {date_str} – RunTogether Radcliffe!
+
+📍 {meeting_point} | 7pm
+
+8k: {row['8k Route']}
+5k: {row['5k Route']}
+
+{note_msg}
+
+📲 Book: https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs"""
+
+st.subheader("📧 Email Message")
+st.text_area("Email:", value=email_msg, height=300)
+
+st.subheader("📱 Facebook Caption")
+st.text_area("Facebook:", value=fb_msg, height=250)
+
+st.subheader("💬 WhatsApp Message")
+st.text_area("WhatsApp:", value=wa_msg, height=250)
