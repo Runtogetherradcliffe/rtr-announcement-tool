@@ -17,7 +17,12 @@ def load_schedule():
 df = load_schedule()
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
-this_week = df[df["Date"] == next_thursday]
+
+available_dates = df["Date"].dropna().sort_values().unique().tolist()
+default_index = available_dates.index(next_thursday) if next_thursday in available_dates else 0
+selected_date = st.selectbox("Select run date:", available_dates, index=default_index)
+
+this_week = df[df["Date"] == selected_date]
 
 if not this_week.empty:
     row = this_week.iloc[0]
@@ -46,6 +51,10 @@ if not this_week.empty:
     intro = random.choice(intros)
     signoff = random.choice(signoffs)
 
+    tour_msg = ""
+    if "radcliffe market" not in meeting_point.lower():
+        tour_msg = "🚌 We’re on tour this week – meeting somewhere different!"
+
     safety_msg = "🔦 Don’t forget your hi-vis and headtorch — we want you glowing for all the right reasons!" if "dark" in notes else ""
     social_msg = "🍻 Fancy a pint? We’re heading to the market after for food and drinks!" if "social" in special else ""
 
@@ -62,50 +71,43 @@ if not this_week.empty:
 
     footer = """📲 Book on when you can:
 https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
-
 ❌ Can’t make it? Just cancel with 1 hour’s notice:
 https://groups.runtogether.co.uk/My/BookedRuns"""
 
     email_msg = f"""{intro}
 
 📍 Meeting at: {meeting_point}  
+{tour_msg}
 {routes_text}  
 🕖 We’ll be setting off at 7:00pm sharp
-
 {safety_msg}
 {social_msg}
-
 {footer}
-
 {signoff}"""
 
     facebook_msg = f"""📣 {intro}
 
 📍 {meeting_point}  
+{tour_msg}
 {routes_text}  
 🕖 7pm start
-
 {safety_msg}
 {social_msg}
-
 {footer}
-
 {signoff}"""
 
     whatsapp_msg = f"""*RunTogether Radcliffe – This Thursday*
 
 📍 {meeting_point}  
+{tour_msg}
 {routes_text}  
 🕖 7pm
-
 {safety_msg}
 {social_msg}
-
 {footer}
-
 {signoff}"""
 else:
-    email_msg = facebook_msg = whatsapp_msg = "⚠️ No route found for next Thursday. Please check the schedule."
+    email_msg = facebook_msg = whatsapp_msg = "⚠️ No route found for selected date. Please check the schedule."
 
 st.subheader("📧 Weekly Email Message")
 st.text_area("Email Text", value=email_msg, height=350)
