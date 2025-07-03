@@ -76,8 +76,8 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 
     email_msg = f"""{intro}
 
-📍 Meeting at: {meeting_point}  
 {tour_msg}
+📍 Meeting at: {meeting_point}  
 {routes_text}  
 🕖 We’ll be setting off at 7:00pm sharp
 {safety_msg}
@@ -87,8 +87,8 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 
     facebook_msg = f"""📣 {intro}
 
-📍 {meeting_point}  
 {tour_msg}
+📍 {meeting_point}  
 {routes_text}  
 🕖 7pm start
 {safety_msg}
@@ -98,8 +98,8 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 
     whatsapp_msg = f"""*RunTogether Radcliffe – This Thursday*
 
-📍 {meeting_point}  
 {tour_msg}
+📍 {meeting_point}  
 {routes_text}  
 🕖 7pm
 {safety_msg}
