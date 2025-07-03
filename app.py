@@ -21,12 +21,11 @@ this_week = df[df["Date"] == next_thursday]
 
 if not this_week.empty:
     row = this_week.iloc[0]
-    meeting_point = row["Meeting point"]
-    route = row["8k Route"]
+    meeting_point = row.get("Meeting point", "[Missing meeting point]")
+    route = row.get("8k Route", "[Missing route]")
     notes = str(row.get("Notes", "")).lower()
     special_events = str(row.get("Special events", "")).lower()
 
-    # Friendly rotating intros
     intros = [
         "Hope your week’s going well!",
         "Ready to clock some miles this Thursday?",
@@ -35,7 +34,6 @@ if not this_week.empty:
         "This week’s run is nearly here – let’s get moving!"
     ]
 
-    # Rotating sign-offs
     signoffs = [
         "See you there, legends! 👟",
         "Headtorch + smile = ready. 😄",
@@ -44,7 +42,6 @@ if not this_week.empty:
         "Run together, smile together!"
     ]
 
-    # Optional safety and social messages
     safety_msg = "🔦 Please wear hi-vis and bring a headtorch – we’ll be running after dark." if "dark" in notes else ""
     social_msg = "🍻 After the run, we’re heading to the market for food and drinks – come along for the social!" if "social" in special_events else ""
 
@@ -54,8 +51,10 @@ https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
 ❌ Can’t make it? Cancel at least 1 hour before:
 https://groups.runtogether.co.uk/My/BookedRuns"""
 
-    # Construct the message
-    email_msg = f"""👋 {random.choice(intros)}
+    intro = random.choice(intros)
+    signoff = random.choice(signoffs)
+
+    email_msg = f"""👋 {intro}
 
 📍 We’re meeting at **{meeting_point}**
 🛣️ Route: **{route}**
@@ -66,9 +65,43 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 
 {footer}
 
-{random.choice(signoffs)}"""
+{signoff}"""
+
+    social_msg_out = f"""📣 {intro}
+
+📍 {meeting_point}
+🛣️ {route}
+🕖 7pm start
+
+{safety_msg}
+{social_msg}
+
+{footer}
+
+{signoff}"""
+
+    whatsapp_msg = f"""*RunTogether Radcliffe – This Thursday*
+
+📍 {meeting_point}
+🛣️ {route}
+🕖 7pm
+
+{safety_msg}
+{social_msg}
+
+{footer}
+
+{signoff}"""
 else:
     email_msg = "⚠️ No route found for next Thursday. Please check the schedule."
+    social_msg_out = email_msg
+    whatsapp_msg = email_msg
 
 st.subheader("📧 Weekly Email Message")
-st.text_area("Email Text", value=email_msg, height=350)
+st.text_area("Email Text", value=email_msg, height=300)
+
+st.subheader("📱 Facebook / Instagram Message")
+st.text_area("Social Media Text", value=social_msg_out, height=250)
+
+st.subheader("💬 WhatsApp Message")
+st.text_area("WhatsApp Text", value=whatsapp_msg, height=200)
