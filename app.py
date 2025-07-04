@@ -188,3 +188,14 @@ st.text_area(label="", value=facebook_msg, height=500, key="facebook")
 
 st.markdown("### 💬 WhatsApp Message")
 st.text_area(label="", value=whatsapp_msg, height=500, key="whatsapp")
+
+
+# Optional copy buttons for user convenience
+with st.expander("📋 Copy Email Message"):
+    st.code(email_msg, language="text")
+
+with st.expander("📋 Copy Facebook Message"):
+    st.code(facebook_msg, language="text")
+
+with st.expander("📋 Copy WhatsApp Message"):
+    st.code(whatsapp_msg, language="text")
