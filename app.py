@@ -31,6 +31,7 @@ link_8k = row.get("8k Strava link", "")
 link_5k = row.get("5k Strava link", "")
 notes = str(row.get("Notes", "")).lower()
 special = str(row.get("Special events", "")).lower()
+events_text = notes + " " + special
 
 intro = random.choice([
     "👋 Hope you're having a great week! Here's what we’ve got planned for Thursday…",
@@ -58,13 +59,13 @@ route_section = "\n".join(route_lines)
 
 # Special notes and keywords
 extra_lines = []
-if "wear" in notes and "green" in notes:
+if "wear" in events_text and "green" in events_text:
     extra_lines.append("🟢 It's **Wear it Green Day** for Mental Health Awareness Week! Join us by wearing something green.")
-if "pride" in notes:
+if "pride" in events_text:
     extra_lines.append("🌈 It’s our **Pride Run**! We’re encouraging everyone to wear something colourful and celebrate together.")
-if "dark" in notes:
+if "dark" in events_text:
     extra_lines.append("🔦 Don’t forget your hi-vis and headtorch – we’ll be running after dark.")
-if "social" in notes or "social" in special:
+if "social" in events_text:
     extra_lines.append("🍻 Afterwards, we’re heading to **Radcliffe Market** for a post-run social – come along!")
 extra_msg = "\n".join(extra_lines)
 
