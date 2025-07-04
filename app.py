@@ -81,7 +81,56 @@ signoff = random.choice([
 ])
 
 # Format each channel
+email_msg = f"""{intro}
 
+{tour_msg}
+{location_line}
+{gmaps_line}
+{time_line}
+
+{route_section}
+
+{extra_msg}
+
+{footer}
+
+{signoff}"""
+
+facebook_msg = f"""📣 {intro}
+
+{tour_msg}
+{location_line}
+{gmaps_line}
+{time_line}
+
+{route_section}
+
+{extra_msg}
+
+{footer}
+
+👍 {signoff}"""
+
+whatsapp_msg = f"""*RunTogether Radcliffe – This Thursday!*
+
+{tour_msg}
+{location_line}
+{gmaps_line}
+{time_line}
+
+{route_section}
+
+{extra_msg}
+
+{footer}
+
+{signoff}"""
+
+# Display
+st.subheader("📧 Email Message")
+
+
+# Final clean message blocks
 email_msg = "\n\n".join([
     intro,
     tour_msg,
@@ -93,6 +142,33 @@ email_msg = "\n\n".join([
     footer,
     signoff
 ])
+
+facebook_msg = "\n\n".join([
+    "📣 " + intro,
+    tour_msg,
+    location_line,
+    gmaps_line,
+    time_line,
+    route_section.replace("*", ""),
+    extra_msg.replace("**", ""),
+    footer,
+    "👍 " + signoff
+])
+
+whatsapp_msg = "\n\n".join([
+    "*RunTogether Radcliffe – This Thursday!*",
+    tour_msg,
+    location_line,
+    gmaps_line,
+    time_line,
+    route_section,
+    extra_msg,
+    footer,
+    signoff
+])
+
+# Display
+st.subheader("📧 Email Message")
 st.text_area("Email", value=email_msg, height=500)
 
 st.subheader("📱 Facebook / Instagram Post")
