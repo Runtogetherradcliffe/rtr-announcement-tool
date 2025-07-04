@@ -127,7 +127,7 @@ whatsapp_msg = f"""*RunTogether Radcliffe – This Thursday!*
 {signoff}"""
 
 # Display
-st.subheader("📧 Email Message")
+
 
 
 # Final message blocks with clean line spacing
