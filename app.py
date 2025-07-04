@@ -81,8 +81,17 @@ signoff = random.choice([
 ])
 
 # Format each channel
-email_clean = intro + "\n\n" + tour_msg + "\n" + location_line + "\n" + gmaps_line + "\n" + time_line + "\n\n" + route_section.replace("*", "") + "\n\n" + extra_msg.replace("**", "") + "\n\n" + footer + "\n\n" + signoff
-email_msg = email_clean
+email_msg = "\n\n".join([
+    intro,
+    tour_msg,
+    location_line,
+    gmaps_line,
+    time_line,
+    route_section.replace("*", ""),
+    extra_msg.replace("**", ""),
+    footer,
+    signoff
+])
 
 {tour_msg}
 {location_line}
@@ -97,8 +106,17 @@ email_msg = email_clean
 
 {signoff}"""
 
-facebook_clean = "📣 " + intro + "\n\n" + tour_msg + "\n" + location_line + "\n" + gmaps_line + "\n" + time_line + "\n\n" + route_section.replace("*", "") + "\n\n" + extra_msg.replace("**", "") + "\n\n" + footer + "\n\n" + "👍 " + signoff
-facebook_msg = facebook_clean
+facebook_msg = "\n\n".join([
+    "📣 " + intro,
+    tour_msg,
+    location_line,
+    gmaps_line,
+    time_line,
+    route_section.replace("*", ""),
+    extra_msg.replace("**", ""),
+    footer,
+    "👍 " + signoff
+])
 
 {tour_msg}
 {location_line}
