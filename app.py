@@ -179,23 +179,14 @@ whatsapp_msg = "\n".join([
     signoff
 ])
 
-# Display content with no duplicate headers
+
+
+# Show each message with copy-friendly block (st.code)
 st.markdown("### 📧 Email Message")
-st.text_area(label="", value=email_msg, height=500, key="email")
+st.code(email_msg, language="text")
 
 st.markdown("### 📱 Facebook / Instagram Post")
-st.text_area(label="", value=facebook_msg, height=500, key="facebook")
+st.code(facebook_msg, language="text")
 
 st.markdown("### 💬 WhatsApp Message")
-st.text_area(label="", value=whatsapp_msg, height=500, key="whatsapp")
-
-
-# Optional copy buttons for user convenience
-with st.expander("📋 Copy Email Message"):
-    st.code(email_msg, language="text")
-
-with st.expander("📋 Copy Facebook Message"):
-    st.code(facebook_msg, language="text")
-
-with st.expander("📋 Copy WhatsApp Message"):
-    st.code(whatsapp_msg, language="text")
+st.code(whatsapp_msg, language="text")
