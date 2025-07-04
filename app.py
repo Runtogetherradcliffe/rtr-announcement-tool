@@ -181,10 +181,10 @@ whatsapp_msg = "\n".join([
 
 # Show once per section
 st.subheader("📧 Email Message")
-st.text_area("Email content", value=email_msg, height=500)
+st.text_area("Email", value=email_msg, height=500)
 
 st.subheader("📱 Facebook / Instagram Post")
-st.text_area("Facebook content", value=facebook_msg, height=500)
+st.text_area("Facebook", value=facebook_msg, height=500)
 
 st.subheader("💬 WhatsApp Message")
-st.text_area("WhatsApp content", value=whatsapp_msg, height=500)
+st.text_area("WhatsApp", value=whatsapp_msg, height=500)
