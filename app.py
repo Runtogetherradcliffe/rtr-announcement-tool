@@ -130,7 +130,7 @@ whatsapp_msg = f"""*RunTogether Radcliffe – This Thursday!*
 st.subheader("📧 Email Message")
 
 
-# Final message blocks with cleaner line spacing
+# Final message blocks with clean line spacing
 email_msg = "\n".join([
     intro,
     tour_msg,
@@ -179,12 +179,12 @@ whatsapp_msg = "\n".join([
     signoff
 ])
 
-# Show once per section
-st.subheader("📧 Email Message")
-st.text_area("Email", value=email_msg, height=500)
+# Display content with no duplicate headers
+st.markdown("### 📧 Email Message")
+st.text_area(label="", value=email_msg, height=500, key="email")
 
-st.subheader("📱 Facebook / Instagram Post")
-st.text_area("Facebook", value=facebook_msg, height=500)
+st.markdown("### 📱 Facebook / Instagram Post")
+st.text_area(label="", value=facebook_msg, height=500, key="facebook")
 
-st.subheader("💬 WhatsApp Message")
-st.text_area("WhatsApp", value=whatsapp_msg, height=500)
+st.markdown("### 💬 WhatsApp Message")
+st.text_area(label="", value=whatsapp_msg, height=500, key="whatsapp")
