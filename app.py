@@ -81,6 +81,7 @@ signoff = random.choice([
 ])
 
 # Format each channel
+
 email_msg = "\n\n".join([
     intro,
     tour_msg,
@@ -92,6 +93,7 @@ email_msg = "\n\n".join([
     footer,
     signoff
 ])
+
 
 {tour_msg}
 {location_line}
@@ -106,6 +108,7 @@ email_msg = "\n\n".join([
 
 {signoff}"""
 
+
 facebook_msg = "\n\n".join([
     "📣 " + intro,
     tour_msg,
@@ -117,6 +120,7 @@ facebook_msg = "\n\n".join([
     footer,
     "👍 " + signoff
 ])
+
 
 {tour_msg}
 {location_line}
