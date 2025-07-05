@@ -115,6 +115,24 @@ else:
         "🎉 Let us know if you're coming!"
     ])
 
+
+# WhatsApp message block (independent of tone)
+whatsapp_msg = "\n".join([
+    "*RunTogether Radcliffe – This Thursday!*",
+    tour_msg,
+    location,
+    gmaps_line,
+    time,
+    "",
+    route_section,
+    "",
+    extra_msg,
+    "",
+    footer,
+    "",
+    signoff
+])
+
 # Interface
 st.markdown("### 📧 Email Message")
 st.code(email_msg, language="text")
