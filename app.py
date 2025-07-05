@@ -34,7 +34,7 @@ client_secret = st.secrets["STRAVA_CLIENT_SECRET"]
 refresh_token = st.secrets["STRAVA_REFRESH_TOKEN"]
 
 access_token = None
-    print('⚠️ No access token set. GPX fetch will be skipped.')
+    st.warning("⚠️ No access token set. GPX fetch will be skipped.")
 if client_id and client_secret and refresh_token:
     try:
         token_data = refresh_strava_token(client_id, client_secret, refresh_token)
