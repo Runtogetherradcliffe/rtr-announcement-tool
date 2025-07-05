@@ -1,8 +1,16 @@
 
 import streamlit as st
 import pandas as pd
-from datetime import datetime, timedelta
 import urllib.parse
+import json
+from datetime import datetime, timedelta
+from strava_utils import refresh_strava_token, fetch_route_description
+
+# Load Strava credentials
+with open("strava_credentials.json") as f:
+    creds = json.load(f)
+
+access_token = refresh_strava_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
 
 st.set_page_config(page_title="RunTogether Radcliffe Weekly Tool", layout="centered")
 st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
@@ -42,11 +50,17 @@ if "radcliffe market" not in meeting_point.lower():
         gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
 time = "🕖 We set off at 7:00pm"
 
+# Route description via Strava
+desc_8k = fetch_route_description(link_8k, access_token) if link_8k else ""
+desc_5k = fetch_route_description(link_5k, access_token) if link_5k else ""
+
 route_lines = ["🛣️ This week we’ve got two route options to choose from:"]
 if route_8k_name and link_8k:
-    route_lines.append(f"• 8k route – {route_8k_name}: {link_8k}")
+    route_lines.append(f"• 8k – {route_8k_name}: {link_8k}")
+    if desc_8k: route_lines.append(f"  {desc_8k}")
 if route_5k_name and link_5k:
-    route_lines.append(f"• 5k route – {route_5k_name}: {link_5k} (or do it as a Jeff – run/walk style!)")
+    route_lines.append(f"• 5k – {route_5k_name}: {link_5k} (or Jeff it!)")
+    if desc_5k: route_lines.append(f"  {desc_5k}")
 route_section = "\n".join(route_lines)
 
 extra_lines = []
@@ -67,19 +81,13 @@ https://groups.runtogether.co.uk/My/BookedRuns"""
 
 signoff = "👟 Grab your shoes, bring your smiles – see you Thursday!"
 
-# Messages
+# Email message
 email_msg = "\n".join([
     intro, tour_msg, location, gmaps_line, time, "", route_section, "", extra_msg, "", footer, "", signoff
 ])
 
-
-
-
-
-
+# Facebook tone toggle
 tone = st.radio("Choose Facebook tone", ["Professional", "Social"], key="facebook_tone_selector")
-
-
 if tone == "Professional":
     facebook_msg = "\n".join([
         "📣 This Week’s Run: Thursday @ 7pm",
@@ -90,7 +98,9 @@ if tone == "Professional":
         "",
         "🛣️ Route Options:",
         f"• 8k – {route_8k_name}: {link_8k}",
+        f"  {desc_8k}",
         f"• 5k – {route_5k_name}: {link_5k} (or Jeff it!)",
+        f"  {desc_5k}",
         "",
         extra_msg,
         "",
@@ -102,9 +112,9 @@ else:
     social_intro = "🗓️ THIS WEEK’S RUN!"
     routes = []
     if route_8k_name and link_8k:
-        routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}")
+        routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}")
     if route_5k_name and link_5k:
-        routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)")
+        routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
     facebook_msg = "\n".join([
         social_intro,
         tour_msg,
@@ -122,8 +132,7 @@ else:
         "🎉 Let us know if you're coming!"
     ])
 
-
-# WhatsApp message block
+# WhatsApp message
 whatsapp_msg = "\n".join([
     "*RunTogether Radcliffe – This Thursday!*",
     tour_msg,
@@ -140,7 +149,7 @@ whatsapp_msg = "\n".join([
     signoff
 ])
 
-# Interface
+# Display outputs
 st.markdown("### 📧 Email Message")
 st.code(email_msg, language="text")
 
@@ -150,7 +159,7 @@ st.code(facebook_msg, language="text")
 st.markdown("### 💬 WhatsApp Message")
 st.code(whatsapp_msg, language="text")
 
-# WhatsApp Share Button
+# WhatsApp share link
 st.markdown("### 🔗 Share to WhatsApp")
 encoded_message = urllib.parse.quote(whatsapp_msg)
 share_url = f"https://wa.me/?text={encoded_message}"
