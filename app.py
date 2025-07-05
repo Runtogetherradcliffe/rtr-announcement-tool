@@ -7,8 +7,11 @@ from datetime import datetime, timedelta
 from strava_utils import refresh_strava_token, fetch_route_description
 
 # Load Strava credentials
-with open("strava_credentials.json") as f:
-    creds = json.load(f)
+creds = {
+    "client_id": st.secrets["client_id"],
+    "client_secret": st.secrets["client_secret"],
+    "refresh_token": st.secrets["refresh_token"]
+}
 
 access_token = refresh_strava_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
 
