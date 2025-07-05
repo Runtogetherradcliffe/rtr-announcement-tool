@@ -1,6 +1,8 @@
 
 import streamlit as st
 import pandas as pd
+import os
+from strava_utils import refresh_strava_token, download_gpx_from_strava_route, extract_landmarks_from_gpx
 import urllib.parse
 import json
 from datetime import datetime, timedelta
@@ -26,6 +28,19 @@ def load_data():
     return df
 
 df = load_data()
+
+# Strava credentials from environment (set these in Streamlit secrets or locally)
+client_id = os.getenv("STRAVA_CLIENT_ID")
+client_secret = os.getenv("STRAVA_CLIENT_SECRET")
+refresh_token = os.getenv("STRAVA_REFRESH_TOKEN")
+
+access_token = None
+if client_id and client_secret and refresh_token:
+    try:
+        token_data = refresh_strava_token(client_id, client_secret, refresh_token)
+        access_token = token_data.get("access_token")
+    except Exception as e:
+        st.warning("Could not refresh Strava token: " + str(e))
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
 available_dates = df["Date"].dropna().sort_values().unique().tolist()
