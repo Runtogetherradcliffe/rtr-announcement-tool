@@ -32,6 +32,26 @@ def load_data():
 
 df = load_data()
 
+# ✅ Fully clean and confirm schedule DataFrame
+df.columns = [str(col).strip() for col in df.columns]
+df = df.loc[:, ~pd.Series(df.columns).duplicated(keep="first")]
+
+# Show column names in sidebar for debugging
+with st.sidebar:
+    st.write("🧾 Columns in spreadsheet:")
+    st.code(list(df.columns))
+
+# Preview relevant subset if available
+desired_columns = [
+    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
+    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
+]
+valid_columns = [col for col in desired_columns if col in df.columns]
+preview_df = df[valid_columns].rename(columns={"2025 Date": "Date"})
+
+with st.expander("📅 Preview of schedule data"):
+    st.dataframe(preview_df)
+
 # 🧼 Prepare schedule preview (no duplicate column selection)
 df.columns = [str(col).strip() for col in df.columns]
 df = df.loc[:, ~df.columns.duplicated()]
@@ -46,7 +66,7 @@ unique_columns = [col for col in desired_columns if col in df.columns and not (c
 preview_df = df[unique_columns].rename(columns={"2025 Date": "Date"})
 
 with st.expander("📅 Preview of schedule data"):
-    st.dataframe(preview_df)
+    
 df.columns = [str(col).strip() for col in df.columns]
 df = df.loc[:, ~df.columns.duplicated()]
 
@@ -64,7 +84,7 @@ available_columns = [col for col in desired_columns if col in df.columns]
 preview_df = df[available_columns].rename(columns={"2025 Date": "Date"})
 
 with st.expander("📅 Preview of schedule data"):
-    st.dataframe(preview_df)
+    
 
 # 🧼 Clean and deduplicate schedule preview
 df.columns = [str(col).strip() for col in df.columns]  # Remove leading/trailing whitespace
@@ -76,7 +96,7 @@ preview_df = df.drop(columns=["2024 Date", "2026 Date"], errors="ignore").rename
 ]
 
 with st.expander("📅 Preview of schedule data"):
-    st.dataframe(preview_df)
+    
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
 
@@ -89,7 +109,7 @@ preview_df = df.drop(columns=["2024 Date", "2026 Date"], errors="ignore").rename
 ]
 
 with st.expander("📅 Preview of schedule data"):
-    st.dataframe(preview_df)
+    
 
 
 available_dates = df["Date"].dropna().sort_values().unique().tolist()
