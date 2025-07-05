@@ -133,8 +133,12 @@ else:
     routes = []
     if route_8k_name and link_8k:
         routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}\n   {landmark_line_8k}")
+    if landmarks_8k:
+        routes.append(f"   🏞️ This route passes " + ", ".join(landmarks_8k))
     if route_5k_name and link_5k:
         routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
+    if landmarks_5k:
+        routes.append(f"   🏞️ This route passes " + ", ".join(landmarks_5k))
     facebook_msg = "\n".join([
         social_intro,
         tour_msg,
