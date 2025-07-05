@@ -28,7 +28,15 @@ def load_data():
 df = load_data()
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
+
+st.write("📅 Preview of schedule data:")
+st.write(df.head())
+
 available_dates = df["Date"].dropna().sort_values().unique().tolist()
+if not available_dates:
+    st.error("⚠️ No available dates found. Please check your spreadsheet column '2025 Date'.")
+    st.stop()
+
 default_index = available_dates.index(next_thursday) if next_thursday in available_dates else 0
 selected_date = st.selectbox("Select run date:", available_dates, index=default_index)
 
