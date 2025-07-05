@@ -73,12 +73,12 @@ email_msg = "\n".join([
 ])
 
 
-tone = 
 
 
-tone = 
+
 
 tone = st.radio("Choose Facebook tone", ["Professional", "Social"], key="facebook_tone_selector")
+
 
 if tone == "Professional":
     facebook_msg = "\n".join([
