@@ -21,6 +21,24 @@ def download_gpx_from_strava_route(route_url, access_token):
         return response.text
     return None
 
+def fetch_route_description(route_url, access_token):
+    route_id = route_url.strip("/").split("/")[-1]
+    headers = {"Authorization": f"Bearer {access_token}"}
+    route_api = f"https://www.strava.com/api/v3/routes/{route_id}"
+    response = requests.get(route_api, headers=headers)
+    if response.ok:
+        data = response.json()
+        distance_km = round(data.get("distance", 0) / 1000, 1)
+        elevation = round(data.get("elevation_gain", 0))
+        if elevation < 20:
+            difficulty = "a flat and fast route 🟢"
+        elif elevation < 50:
+            difficulty = "a gently rolling route 🌿"
+        else:
+            difficulty = "a few hills this week! 🔺"
+        return f"{distance_km} km with {elevation}m of elevation – {difficulty}"
+    return ""
+
 def extract_landmarks_from_gpx(gpx_data, max_points=3):
     if not gpx_data:
         return []
@@ -31,7 +49,6 @@ def extract_landmarks_from_gpx(gpx_data, max_points=3):
     if not points:
         return []
 
-    # sample evenly spaced points along the route
     step = max(1, len(points) // max_points)
     sampled_points = points[::step][:max_points]
 
