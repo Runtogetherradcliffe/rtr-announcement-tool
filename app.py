@@ -96,11 +96,11 @@ if link_5k:
 
 route_lines = ["🛣️ This week we’ve got two route options to choose from:"]
 if route_8k_name and link_8k:
-    route_lines.append(f"• 8k – {route_8k_name}: {link_8k}")
+        route_lines.append(f"• 8k – {route_8k_name}: {link_8k}")
     if desc_8k: route_lines.append(f"  {desc_8k}")
     if landmarks_8k: route_lines.append(f"  {landmarks_8k}")
 if route_5k_name and link_5k:
-    route_lines.append(f"• 5k – {route_5k_name}: {link_5k} (or Jeff it!)")
+        route_lines.append(f"• 5k – {route_5k_name}: {link_5k} (or Jeff it!)")
     if desc_5k: route_lines.append(f"  {desc_5k}")
     if landmarks_5k: route_lines.append(f"  {landmarks_5k}")
 route_section = "\n".join(route_lines)
@@ -154,9 +154,9 @@ else:
     social_intro = "🗓️ THIS WEEK’S RUN!"
     routes = []
     if route_8k_name and link_8k:
-    routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}")
+        routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}")
     if route_5k_name and link_5k:
-    routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
+        routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
     facebook_msg = "\n".join([
         social_intro,
         tour_msg,
