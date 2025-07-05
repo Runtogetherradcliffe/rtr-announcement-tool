@@ -4,12 +4,7 @@ import pandas as pd
 import urllib.parse
 import json
 from datetime import datetime, timedelta
-from strava_utils import (
-    refresh_strava_token,
-    fetch_route_description,
-    fetch_gpx_file,
-    extract_landmarks_from_gpx,
-)
+from strava_utils import refresh_strava_token, fetch_route_description
 
 # Load Strava credentials
 creds = {
@@ -31,6 +26,8 @@ def load_data():
     return df
 
 df = load_data()
+
+# ✅ Clean and preview schedule
 df.columns = [str(col).strip() for col in df.columns]
 df = df.loc[:, ~pd.Series(df.columns).duplicated(keep="first")]
 
@@ -39,126 +36,26 @@ with st.sidebar():
     st.code(list(df.columns))
 
 desired_columns = [
-    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
-    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
+    "Week",
+    "2025 Date",
+    "Special events",
+    "Notes",
+    "Meeting point",
+    "8k Route",
+    "8k Strava link",
+    "5k Route",
+    "5k Strava link"
 ]
 valid_columns = [col for col in desired_columns if col in df.columns]
 preview_df = df[valid_columns].rename(columns={"2025 Date": "Date"})
+
 with st.expander("📅 Preview of schedule data"):
     st.dataframe(preview_df)
-
-# ✅ Fully clean and confirm schedule DataFrame
-df.columns = [str(col).strip() for col in df.columns]
-df = df.loc[:, ~pd.Series(df.columns).duplicated(keep="first")]
-
-# Show column names in sidebar for debugging
-with st.sidebar():
-
-# Preview relevant subset if available
-desired_columns = [
-    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
-    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
-]
-valid_columns = [col for col in desired_columns if col in df.columns]
-
-
-# ✅ Fully clean and confirm schedule DataFrame
-df.columns = [str(col).strip() for col in df.columns]
-df = df.loc[:, ~pd.Series(df.columns).duplicated(keep="first")]
-
-# Show column names in sidebar for debugging
-with st.sidebar():
-
-    # Preview relevant subset if available
-desired_columns = [
-    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
-    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
-]
-valid_columns = [col for col in desired_columns if col in df.columns]
-
-    
-
-# ✅ Fully clean and confirm schedule DataFrame
-df.columns = [str(col).strip() for col in df.columns]
-df = df.loc[:, ~pd.Series(df.columns).duplicated(keep="first")]
-
-# Show column names in sidebar for debugging
-with st.sidebar():
-
-    # Preview relevant subset if available
-desired_columns = [
-    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
-    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
-]
-valid_columns = [col for col in desired_columns if col in df.columns]
-
-    
-
-# ✅ Fully clean and confirm schedule DataFrame
-df.columns = [str(col).strip() for col in df.columns]
-df = df.loc[:, ~pd.Series(df.columns).duplicated(keep="first")]
-
-# Show column names in sidebar for debugging
-with st.sidebar():
-
-    # Preview relevant subset if available
-desired_columns = [
-    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
-    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
-]
-valid_columns = [col for col in desired_columns if col in df.columns]
-
-    
-
-# 🧼 Prepare schedule preview (no duplicate column selection)
-df.columns = [str(col).strip() for col in df.columns]
-df = df.loc[:, ~df.columns.duplicated()]
-
-desired_columns = [
-    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
-    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
-]
-seen = set()
-unique_columns = [col for col in desired_columns if col in df.columns and not (col in seen or seen.add(col))]
-
-
-    
-df.columns = [str(col).strip() for col in df.columns]
-df = df.loc[:, ~df.columns.duplicated()]
-
-# 🧼 Prepare schedule preview with column sanity checks
-df.columns = [str(col).strip() for col in df.columns]
-df = df.loc[:, ~df.columns.duplicated()]
-
-desired_columns = [
-    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
-    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
-]
-
-# Filter for only existing columns
-available_columns = [col for col in desired_columns if col in df.columns]
-
-    
-
-# 🧼 Clean and deduplicate schedule preview
-df.columns = [str(col).strip() for col in df.columns]  # Remove leading/trailing whitespace
-df = df.loc[:, ~df.columns.duplicated()]  # Remove duplicated columns if any
-    columns={"2025 Date": "Date"}
-    ["Week", "Date", "Special events", "Notes", "Meeting point", "8k Route", "8k Strava link", "5k Route", "5k Strava link"]
-]
-
-    
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
 
-
-# 🧼 Clean and format schedule preview
-    columns={"2025 Date": "Date"}
-    ["Week", "Date", "Special events", "Notes", "Meeting point", "8k Route", "8k Strava link", "5k Route", "5k Strava link"]
-]
-
-    
-
+st.write("📅 Preview of schedule data:")
+st.write(df.head())
 
 available_dates = df["Date"].dropna().sort_values().unique().tolist()
 if not available_dates:
@@ -309,10 +206,13 @@ whatsapp_msg = "\n".join([
 
 # Display outputs
 st.markdown("### 📧 Email Message")
+st.code(email_msg, language="text")
 
 st.markdown("### 📱 Facebook / Instagram Post")
+st.code(facebook_msg, language="text")
 
 st.markdown("### 💬 WhatsApp Message")
+st.code(whatsapp_msg, language="text")
 
 # WhatsApp share link
 st.markdown("### 🔗 Share to WhatsApp")
