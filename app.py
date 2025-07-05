@@ -63,6 +63,10 @@ time = "🕖 We set off at 7:00pm"
 desc_8k = fetch_route_description(link_8k, access_token) if link_8k else ""
 desc_5k = fetch_route_description(link_5k, access_token) if link_5k else ""
 
+
+gpx_data_8k = download_gpx_from_strava_route(link_8k, access_token) if link_8k else None
+gpx_data_5k = download_gpx_from_strava_route(link_5k, access_token) if link_5k else None
+
 landmarks_8k = extract_landmarks_from_gpx(gpx_data_8k)
 landmarks_5k = extract_landmarks_from_gpx(gpx_data_5k)
 
