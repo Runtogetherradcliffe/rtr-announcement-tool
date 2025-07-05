@@ -29,7 +29,7 @@ df = load_data()
 
 # ✅ Clean and preview schedule
 df.columns = [str(col).strip() for col in df.columns]
-df = df.loc[:, ~pd.Series(df.columns).duplicated(keep="first")]
+df = df.loc[:, ~df.columns.duplicated(keep="first")]
 
 with st.sidebar():
     st.write("🧾 Columns in spreadsheet:")
