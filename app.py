@@ -18,7 +18,6 @@ try:
 except Exception as e:
     st.warning("⚠️ Could not refresh Strava access token. GPX fetch will be skipped.")
     access_token = None
-}
 
 try:
     st.write("✅ Access token acquired.")
