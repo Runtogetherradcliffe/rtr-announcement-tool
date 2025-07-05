@@ -1,7 +1,6 @@
 
 import streamlit as st
 import pandas as pd
-import os
 from strava_utils import refresh_strava_token, download_gpx_from_strava_route, extract_landmarks_from_gpx
 import urllib.parse
 import json
@@ -30,9 +29,9 @@ def load_data():
 df = load_data()
 
 # Strava credentials from environment (set these in Streamlit secrets or locally)
-client_id = os.getenv("STRAVA_CLIENT_ID")
-client_secret = os.getenv("STRAVA_CLIENT_SECRET")
-refresh_token = os.getenv("STRAVA_REFRESH_TOKEN")
+client_id = st.secrets["STRAVA_CLIENT_ID"]
+client_secret = st.secrets["STRAVA_CLIENT_SECRET"]
+refresh_token = st.secrets["STRAVA_REFRESH_TOKEN"]
 
 access_token = None
     print('⚠️ No access token set. GPX fetch will be skipped.')
