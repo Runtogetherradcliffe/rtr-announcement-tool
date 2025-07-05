@@ -35,14 +35,14 @@ client_secret = os.getenv("STRAVA_CLIENT_SECRET")
 refresh_token = os.getenv("STRAVA_REFRESH_TOKEN")
 
 access_token = None
-print('⚠️ No access token set. GPX fetch will be skipped.')
+    print('⚠️ No access token set. GPX fetch will be skipped.')
 if client_id and client_secret and refresh_token:
     try:
         token_data = refresh_strava_token(client_id, client_secret, refresh_token)
         access_token = token_data.get("access_token")
-        st.write("✅ Access token acquired.")
+    st.write("✅ Access token acquired.")
     except Exception as e:
-        st.warning("Could not refresh Strava token: " + str(e))
+    st.warning("Could not refresh Strava token: " + str(e))
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
 available_dates = df["Date"].dropna().sort_values().unique().tolist()
