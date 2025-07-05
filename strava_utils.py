@@ -1,5 +1,7 @@
 
 import requests
+import time
+import gpxpy
 
 def refresh_strava_token(client_id, client_secret, refresh_token):
     response = requests.post(
@@ -29,7 +31,6 @@ def fetch_route_description(route_url, access_token):
         distance_km = round(data.get("distance", 0) / 1000, 1)
         elevation_gain = int(data.get("elevation_gain", 0))
 
-        # Generate a natural description based on elevation
         if elevation_gain < 20:
             comment = "a flat and fast route 🟢"
         elif elevation_gain < 60:
@@ -39,9 +40,7 @@ def fetch_route_description(route_url, access_token):
 
         return f"{distance_km} km with {elevation_gain}m of elevation – {comment}"
     else:
-        return f"(⚠️ Could not fetch route details)"
-
-import requests
+        return "(⚠️ Could not fetch route details)"
 
 def fetch_gpx_file(route_url, access_token):
     route_id = extract_route_id(route_url)
@@ -50,11 +49,8 @@ def fetch_gpx_file(route_url, access_token):
     response = requests.get(gpx_url, headers=headers)
 
     if response.status_code == 200:
-        return response.content  # raw GPX bytes
-    else:
-        return None
-
-import gpxpy
+        return response.content
+    return None
 
 def extract_gps_points_from_gpx(gpx_bytes, max_points=5):
     try:
@@ -64,18 +60,14 @@ def extract_gps_points_from_gpx(gpx_bytes, max_points=5):
             for segment in track.segments:
                 for point in segment.points:
                     points.append((point.latitude, point.longitude))
-        return points[:max_points]  # return only the first few points for reverse geocoding
-    except Exception as e:
+        return points[:max_points]
+    except Exception:
         return []
-
-import time
 
 def reverse_geocode(lat, lon):
     try:
         url = f"https://nominatim.openstreetmap.org/reverse?format=json&lat={lat}&lon={lon}&zoom=16&addressdetails=1"
-        headers = {
-            "User-Agent": "RunTogetherApp/1.0"
-        }
+        headers = {"User-Agent": "RunTogetherApp/1.0"}
         response = requests.get(url, headers=headers)
         if response.status_code == 200:
             data = response.json()
@@ -107,7 +99,7 @@ def extract_landmarks_from_gpx(gpx_bytes, access_token, num_points=4):
             if name and name not in seen:
                 seen.add(name)
                 landmarks.append(name)
-                time.sleep(1.1)  # to respect OpenStreetMap rate limits
+                time.sleep(1.1)
 
         if landmarks:
             return "Expect views through: " + ", ".join(landmarks) + "."
