@@ -32,6 +32,22 @@ def load_data():
 
 df = load_data()
 
+# 🧼 Prepare schedule preview with column sanity checks
+df.columns = [str(col).strip() for col in df.columns]
+df = df.loc[:, ~df.columns.duplicated()]
+
+desired_columns = [
+    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
+    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
+]
+
+# Filter for only existing columns
+available_columns = [col for col in desired_columns if col in df.columns]
+preview_df = df[available_columns].rename(columns={"2025 Date": "Date"})
+
+with st.expander("📅 Preview of schedule data"):
+    st.dataframe(preview_df)
+
 # 🧼 Clean and deduplicate schedule preview
 df.columns = [str(col).strip() for col in df.columns]  # Remove leading/trailing whitespace
 df = df.loc[:, ~df.columns.duplicated()]  # Remove duplicated columns if any
