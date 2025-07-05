@@ -73,10 +73,10 @@ email_msg = "\n".join([
 ])
 
 
-tone = st.radio("Facebook message tone", ["Professional", "Social"], key="fb_tone")
+tone = st.radio("Facebook message tone", ["Professional", "Social"])
 
 
-tone = st.radio("Facebook message tone", ["Professional", "Social"], key="fb_tone")
+tone = st.radio("Facebook message tone", ["Professional", "Social"])
 
 if tone == "Professional":
     facebook_msg = "\n".join([
