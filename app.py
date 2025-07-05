@@ -31,6 +31,22 @@ def load_data():
     return df
 
 df = load_data()
+
+# 🧼 Prepare schedule preview (no duplicate column selection)
+df.columns = [str(col).strip() for col in df.columns]
+df = df.loc[:, ~df.columns.duplicated()]
+
+desired_columns = [
+    "Week", "2025 Date", "Special events", "Notes", "Meeting point",
+    "8k Route", "8k Strava link", "5k Route", "5k Strava link"
+]
+seen = set()
+unique_columns = [col for col in desired_columns if col in df.columns and not (col in seen or seen.add(col))]
+
+preview_df = df[unique_columns].rename(columns={"2025 Date": "Date"})
+
+with st.expander("📅 Preview of schedule data"):
+    st.dataframe(preview_df)
 df.columns = [str(col).strip() for col in df.columns]
 df = df.loc[:, ~df.columns.duplicated()]
 
