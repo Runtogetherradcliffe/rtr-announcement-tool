@@ -163,6 +163,7 @@ if route_8k_name and link_8k:
         route_lines.append(f"  {desc_8k}")
     if landmarks_8k:
         route_lines.append(f"  {landmarks_8k}")
+    social_intro = "🎉 Join us for this week’s run!"
     facebook_msg = "\n".join([
         social_intro,
         tour_msg,
