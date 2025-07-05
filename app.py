@@ -75,9 +75,11 @@ email_msg = "\n".join([
 
 tone = st.radio("Facebook message tone", ["Professional", "Social"])
 
+
+tone = st.radio("Facebook message tone", ["Professional", "Social"])
+
 if tone == "Professional":
-    
-facebook_msg = "\n".join([
+    facebook_msg = "\n".join([
         "📣 This Week’s Run: Thursday @ 7pm",
         "",
         f"📍 Location: {meeting_point}",
@@ -93,20 +95,6 @@ facebook_msg = "\n".join([
         footer,
         "",
         "👍 Let us know you're coming!"
-    ])
-        "📣 " + intro,
-        tour_msg,
-        location,
-        gmaps_line,
-        time,
-        "",
-        route_section,
-        "",
-        extra_msg,
-        "",
-        footer,
-        "",
-        "👍 " + signoff
     ])
 else:
     social_intro = "🗓️ THIS WEEK’S RUN!"
@@ -115,24 +103,7 @@ else:
         routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}")
     if route_5k_name and link_5k:
         routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)")
-    
-facebook_msg = "\n".join([
-        "📣 This Week’s Run: Thursday @ 7pm",
-        "",
-        f"📍 Location: {meeting_point}",
-        gmaps_line,
-        "🕖 We set off at 7:00pm sharp",
-        "",
-        "🛣️ Route Options:",
-        f"• 8k – {route_8k_name}: {link_8k}",
-        f"• 5k – {route_5k_name}: {link_5k} (or Jeff it!)",
-        "",
-        extra_msg,
-        "",
-        footer,
-        "",
-        "👍 Let us know you're coming!"
-    ])
+    facebook_msg = "\n".join([
         social_intro,
         tour_msg,
         f"📍 WHERE: {meeting_point}",
@@ -150,7 +121,7 @@ facebook_msg = "\n".join([
     ])
 
 
-# WhatsApp message block (independent of tone)
+# WhatsApp message block
 whatsapp_msg = "\n".join([
     "*RunTogether Radcliffe – This Thursday!*",
     tour_msg,
