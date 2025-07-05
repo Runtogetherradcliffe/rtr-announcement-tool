@@ -22,7 +22,7 @@ st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
 def load_data():
     df = pd.read_excel("RTR route schedule.xlsx")
     df.columns = df.columns.str.strip()
-    df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
+    df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.date
     return df
 
 df = load_data()
@@ -41,7 +41,7 @@ with st.sidebar:
 
 desired_columns = [
     "Week",
-    "2025 Date",
+    "Date",
     "Special events",
     "Notes",
     "Meeting point",
@@ -51,7 +51,7 @@ desired_columns = [
     "5k Strava link"
 ]
     "Week",
-    "2025 Date",
+    "Date",
     "Special events",
     "Notes",
     "Meeting point",
@@ -61,7 +61,7 @@ desired_columns = [
     "5k Strava link"
 ]
 valid_columns = [col for col in desired_columns if col in df.columns]
-preview_df = df[valid_columns].rename(columns={"2025 Date": "Date"})
+preview_df = df[valid_columns].rename(columns={"Date": "Date"})
 
 with st.expander("📅 Preview of schedule data"):
     st.dataframe(preview_df)
