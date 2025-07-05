@@ -4,7 +4,12 @@ import pandas as pd
 import urllib.parse
 import json
 from datetime import datetime, timedelta
-from strava_utils import refresh_strava_token, fetch_route_description
+from strava_utils import (
+    refresh_strava_token,
+    fetch_route_description,
+    fetch_gpx_file,
+    extract_landmarks_from_gpx,
+)
 
 # Load Strava credentials
 creds = {
