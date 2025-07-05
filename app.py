@@ -71,12 +71,49 @@ signoff = "👟 Grab your shoes, bring your smiles – see you Thursday!"
 email_msg = "\n".join([
     intro, tour_msg, location, gmaps_line, time, "", route_section, "", extra_msg, "", footer, "", signoff
 ])
-facebook_msg = "\n".join([
-    "📣 " + intro, tour_msg, location, gmaps_line, time, "", route_section, "", extra_msg, "", footer, "", "👍 " + signoff
-])
-whatsapp_msg = "\n".join([
-    "*RunTogether Radcliffe – This Thursday!*", tour_msg, location, gmaps_line, time, "", route_section, "", extra_msg, "", footer, "", signoff
-])
+
+
+tone = st.radio("Facebook message tone", ["Professional", "Social"])
+
+if tone == "Professional":
+    facebook_msg = "\n".join([
+        "📣 " + intro,
+        tour_msg,
+        location,
+        gmaps_line,
+        time,
+        "",
+        route_section,
+        "",
+        extra_msg,
+        "",
+        footer,
+        "",
+        "👍 " + signoff
+    ])
+else:
+    social_intro = "🗓️ THIS WEEK’S RUN!"
+    routes = []
+    if route_8k_name and link_8k:
+        routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}")
+    if route_5k_name and link_5k:
+        routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)")
+    facebook_msg = "\n".join([
+        social_intro,
+        tour_msg,
+        f"📍 WHERE: {meeting_point}",
+        gmaps_line,
+        "🕖 WHEN: We set off at 7:00pm",
+        "",
+        "🛣️ ROUTES:",
+        *routes,
+        "",
+        extra_msg,
+        "",
+        footer,
+        "",
+        "🎉 Let us know if you're coming!"
+    ])
 
 # Interface
 st.markdown("### 📧 Email Message")
