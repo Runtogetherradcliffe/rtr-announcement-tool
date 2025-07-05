@@ -41,7 +41,7 @@ with st.sidebar():
     st.write("🧾 Columns in spreadsheet:")
     st.code(list(df.columns))
 
-# Preview relevant subset if available
+    # Preview relevant subset if available
 desired_columns = [
     "Week", "2025 Date", "Special events", "Notes", "Meeting point",
     "8k Route", "8k Strava link", "5k Route", "5k Strava link"
@@ -57,11 +57,11 @@ df.columns = [str(col).strip() for col in df.columns]
 df = df.loc[:, ~pd.Series(df.columns).duplicated(keep="first")]
 
 # Show column names in sidebar for debugging
-with st.sidebar:
+with st.sidebar():
     st.write("🧾 Columns in spreadsheet:")
     st.code(list(df.columns))
 
-# Preview relevant subset if available
+    # Preview relevant subset if available
 desired_columns = [
     "Week", "2025 Date", "Special events", "Notes", "Meeting point",
     "8k Route", "8k Strava link", "5k Route", "5k Strava link"
@@ -77,11 +77,11 @@ df.columns = [str(col).strip() for col in df.columns]
 df = df.loc[:, ~pd.Series(df.columns).duplicated(keep="first")]
 
 # Show column names in sidebar for debugging
-with st.sidebar:
+with st.sidebar():
     st.write("🧾 Columns in spreadsheet:")
     st.code(list(df.columns))
 
-# Preview relevant subset if available
+    # Preview relevant subset if available
 desired_columns = [
     "Week", "2025 Date", "Special events", "Notes", "Meeting point",
     "8k Route", "8k Strava link", "5k Route", "5k Strava link"
