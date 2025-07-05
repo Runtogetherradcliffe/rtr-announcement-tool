@@ -34,8 +34,17 @@ df = load_data()
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
 
-st.write("📅 Preview of schedule data:")
-st.write(df.head())
+
+# 🧼 Clean and format schedule preview
+preview_df = df.drop(columns=["2024 Date", "2026 Date"], errors="ignore").rename(
+    columns={"2025 Date": "Date"}
+)[
+    ["Week", "Date", "Special events", "Notes", "Meeting point", "8k Route", "8k Strava link", "5k Route", "5k Strava link"]
+]
+
+with st.expander("📅 Preview of schedule data"):
+    st.dataframe(preview_df)
+
 
 available_dates = df["Date"].dropna().sort_values().unique().tolist()
 if not available_dates:
