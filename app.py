@@ -31,6 +31,18 @@ def load_data():
     return df
 
 df = load_data()
+
+# 🧼 Clean and deduplicate schedule preview
+df.columns = [str(col).strip() for col in df.columns]  # Remove leading/trailing whitespace
+df = df.loc[:, ~df.columns.duplicated()]  # Remove duplicated columns if any
+preview_df = df.drop(columns=["2024 Date", "2026 Date"], errors="ignore").rename(
+    columns={"2025 Date": "Date"}
+)[
+    ["Week", "Date", "Special events", "Notes", "Meeting point", "8k Route", "8k Strava link", "5k Route", "5k Strava link"]
+]
+
+with st.expander("📅 Preview of schedule data"):
+    st.dataframe(preview_df)
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
 
