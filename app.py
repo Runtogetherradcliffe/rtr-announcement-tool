@@ -14,7 +14,16 @@ creds = {
     "refresh_token": st.secrets["refresh_token"]
 }
 
-access_token = refresh_strava_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
+try:
+    client_id = st.secrets["STRAVA_CLIENT_ID"]
+    client_secret = st.secrets["STRAVA_CLIENT_SECRET"]
+    refresh_token = st.secrets["STRAVA_REFRESH_TOKEN"]
+    token_data = refresh_strava_token(client_id, client_secret, refresh_token)
+    access_token = token_data.get("access_token")
+    st.write("✅ Access token acquired.")
+except Exception as e:
+    st.warning("⚠️ Could not refresh Strava access token. GPX fetch will be skipped.")
+    access_token = None
 
 st.set_page_config(page_title="RunTogether Radcliffe Weekly Tool", layout="centered")
 st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
@@ -29,16 +38,9 @@ def load_data():
 df = load_data()
 
 # Strava credentials from environment (set these in Streamlit secrets or locally)
-client_id = st.secrets["STRAVA_CLIENT_ID"]
-client_secret = st.secrets["STRAVA_CLIENT_SECRET"]
-refresh_token = st.secrets["STRAVA_REFRESH_TOKEN"]
 
-access_token = None
-    st.warning("⚠️ No access token set. GPX fetch will be skipped.")
 if client_id and client_secret and refresh_token:
     try:
-        token_data = refresh_strava_token(client_id, client_secret, refresh_token)
-        access_token = token_data.get("access_token")
     st.write("✅ Access token acquired.")
     except Exception as e:
     st.warning("Could not refresh Strava token: " + str(e))
