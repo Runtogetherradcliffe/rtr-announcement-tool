@@ -22,59 +22,22 @@ st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
 def load_data():
     df = pd.read_excel("RTR route schedule.xlsx")
     df.columns = df.columns.str.strip()
-    df["Date"] = pd.to_datetime(df["Date"], errors="coerce").dt.date
+    df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
     return df
 
 df = load_data()
 
-# ✅ Clean and preview schedule
-df.columns = [str(col).strip() for col in df.columns]
-df = df.loc[:, ~df.columns.duplicated(keep="first")]
-
-with st.sidebar:
-    st.write("🧾 Columns in spreadsheet:")
-    filtered_cols = [col for col in df.columns if col not in ['Date', '2026 Date', 'C25K week', 'C25K link', '2024 Date']]
-    st.code(filtered_cols)
-    st.write("🧾 Columns in spreadsheet:")
-    filtered_cols = [col for col in df.columns if col not in ['Date', '2026 Date', 'C25K week', 'C25K link', '2024 Date']]
-    st.code(filtered_cols)
-
-desired_columns = [
-    "Week",
-    "Date",
-    "Special events",
-    "Notes",
-    "Meeting point",
-    "8k Route",
-    "8k Strava link",
-    "5k Route",
-    "5k Strava link"
-]
-    "Week",
-    "Date",
-    "Special events",
-    "Notes",
-    "Meeting point",
-    "8k Route",
-    "8k Strava link",
-    "5k Route",
-    "5k Strava link"
-]
-    "Week",
-    "Date",
-    "Special events",
-    "Notes",
-    "Meeting point",
-    "8k Route",
-    "8k Strava link",
-    "5k Route",
-    "5k Strava link"
-]
-valid_columns = [col for col in desired_columns if col in df.columns]
-preview_df = df[valid_columns].rename(columns={"Date": "Date"})
-
-with st.expander("📅 Preview of schedule data"):
-    st.dataframe(preview_df)
+# ✅ Column selector preview block
+st.write("📅 Preview of schedule data:")
+desired_columns = st.multiselect(
+    "Select columns to preview",
+    options=list(df.columns),
+    default=list(df.columns)
+)
+if desired_columns:
+    st.dataframe(df[desired_columns].head())
+else:
+    st.write("*(No columns selected for preview.)*")
 today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
 
