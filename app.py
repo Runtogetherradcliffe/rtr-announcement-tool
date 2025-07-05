@@ -87,7 +87,7 @@ landmarks_5k = ""
 if link_8k:
     gpx_data_8k = fetch_gpx_file(link_8k, access_token)
     if gpx_data_8k:
-    landmarks_8k = extract_landmarks_from_gpx(gpx_data_8k, access_token)
+        landmarks_8k = extract_landmarks_from_gpx(gpx_data_8k, access_token)
 
 if link_5k:
     gpx_data_5k = fetch_gpx_file(link_5k, access_token)
