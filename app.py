@@ -31,6 +31,8 @@ def load_data():
     return df
 
 df = load_data()
+df.columns = [str(col).strip() for col in df.columns]
+df = df.loc[:, ~df.columns.duplicated()]
 
 # 🧼 Prepare schedule preview with column sanity checks
 df.columns = [str(col).strip() for col in df.columns]
