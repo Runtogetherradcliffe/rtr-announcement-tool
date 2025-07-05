@@ -70,7 +70,7 @@ gmaps_line = ""
 if "radcliffe market" not in meeting_point.lower():
     tour_msg = "🚌 We’re on tour this week – meeting somewhere different!"
     if gmaps_link:
-        gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
+    gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
 time = "🕖 We set off at 7:00pm"
 
 # Route description via Strava
@@ -87,12 +87,12 @@ landmarks_5k = ""
 if link_8k:
     gpx_data_8k = fetch_gpx_file(link_8k, access_token)
     if gpx_data_8k:
-        landmarks_8k = extract_landmarks_from_gpx(gpx_data_8k, access_token)
+    landmarks_8k = extract_landmarks_from_gpx(gpx_data_8k, access_token)
 
 if link_5k:
     gpx_data_5k = fetch_gpx_file(link_5k, access_token)
     if gpx_data_5k:
-        landmarks_5k = extract_landmarks_from_gpx(gpx_data_5k, access_token)
+    landmarks_5k = extract_landmarks_from_gpx(gpx_data_5k, access_token)
 
 route_lines = ["🛣️ This week we’ve got two route options to choose from:"]
 if route_8k_name and link_8k:
@@ -154,9 +154,9 @@ else:
     social_intro = "🗓️ THIS WEEK’S RUN!"
     routes = []
     if route_8k_name and link_8k:
-        routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}")
+    routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}")
     if route_5k_name and link_5k:
-        routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
+    routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
     facebook_msg = "\n".join([
         social_intro,
         tour_msg,
