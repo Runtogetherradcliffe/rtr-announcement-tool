@@ -144,7 +144,6 @@ available_columns = [col for col in desired_columns if col in df.columns]
 df.columns = [str(col).strip() for col in df.columns]  # Remove leading/trailing whitespace
 df = df.loc[:, ~df.columns.duplicated()]  # Remove duplicated columns if any
     columns={"2025 Date": "Date"}
-)[
     ["Week", "Date", "Special events", "Notes", "Meeting point", "8k Route", "8k Strava link", "5k Route", "5k Strava link"]
 ]
 
@@ -155,7 +154,6 @@ next_thursday = today + timedelta((3 - today.weekday()) % 7)
 
 # 🧼 Clean and format schedule preview
     columns={"2025 Date": "Date"}
-)[
     ["Week", "Date", "Special events", "Notes", "Meeting point", "8k Route", "8k Strava link", "5k Route", "5k Strava link"]
 ]
 
