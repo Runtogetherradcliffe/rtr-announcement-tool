@@ -22,7 +22,7 @@ st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
 def load_data():
     df = pd.read_excel("RTR route schedule.xlsx")
     if 'Date' in df.columns:
-        df.columns = df.columns.str.strip()
+    df.columns = df.columns.str.strip()
     return df
 
 df = load_data()
@@ -70,7 +70,7 @@ gmaps_line = ""
 if "radcliffe market" not in meeting_point.lower():
     tour_msg = "🚌 We’re on tour this week – meeting somewhere different!"
     if gmaps_link:
-        gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
+    gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
 time = "🕖 We set off at 7:00pm"
 
 # Route description via Strava
