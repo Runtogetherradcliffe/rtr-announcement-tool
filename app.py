@@ -68,9 +68,7 @@ gpx_data_8k = download_gpx_from_strava_route(link_8k, access_token) if link_8k e
 gpx_data_5k = download_gpx_from_strava_route(link_5k, access_token) if link_5k else None
 
 landmarks_8k = extract_landmarks_from_gpx(gpx_data_8k)
-st.write('🔍 8k Landmarks:', landmarks_8k)
 landmarks_5k = extract_landmarks_from_gpx(gpx_data_5k)
-st.write('🔍 5k Landmarks:', landmarks_5k)
 
 landmark_line_8k = f"🏞️ This route passes {', '.join(landmarks_8k)}." if landmarks_8k else ""
 landmark_line_5k = f"🏞️ This route passes {', '.join(landmarks_5k)}." if landmarks_5k else ""
@@ -136,9 +134,13 @@ else:
     if route_8k_name and link_8k:
         routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}\n   {landmark_line_8k}")
     if landmarks_8k:
+        routes[-1] += f"\n  🏞️ This route passes {', '.join(landmarks_8k)}"
+    if landmarks_8k:
         routes.append(f"   🏞️ This route passes " + ", ".join(landmarks_8k))
     if route_5k_name and link_5k:
         routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
+    if landmarks_5k:
+        routes[-1] += f"\n  🏞️ This route passes {', '.join(landmarks_5k)}"
     if landmarks_5k:
         routes.append(f"   🏞️ This route passes " + ", ".join(landmarks_5k))
     facebook_msg = "\n".join([
