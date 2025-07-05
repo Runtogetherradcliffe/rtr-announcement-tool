@@ -33,11 +33,23 @@ df = df.loc[:, ~df.columns.duplicated(keep="first")]
 
 with st.sidebar:
     st.write("🧾 Columns in spreadsheet:")
-    st.code(list(df.columns))
+    filtered_cols = [col for col in df.columns if col not in ['Date', '2026 Date', 'C25K week', 'C25K link', '2024 Date']]
+    st.code(filtered_cols)
     st.write("🧾 Columns in spreadsheet:")
-    st.code(list(df.columns))
+    filtered_cols = [col for col in df.columns if col not in ['Date', '2026 Date', 'C25K week', 'C25K link', '2024 Date']]
+    st.code(filtered_cols)
 
 desired_columns = [
+    "Week",
+    "2025 Date",
+    "Special events",
+    "Notes",
+    "Meeting point",
+    "8k Route",
+    "8k Strava link",
+    "5k Route",
+    "5k Strava link"
+]
     "Week",
     "2025 Date",
     "Special events",
