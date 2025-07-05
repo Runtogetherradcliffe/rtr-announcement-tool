@@ -60,6 +60,16 @@ desired_columns = [
     "5k Route",
     "5k Strava link"
 ]
+    "Week",
+    "Date",
+    "Special events",
+    "Notes",
+    "Meeting point",
+    "8k Route",
+    "8k Strava link",
+    "5k Route",
+    "5k Strava link"
+]
 valid_columns = [col for col in desired_columns if col in df.columns]
 preview_df = df[valid_columns].rename(columns={"Date": "Date"})
 
