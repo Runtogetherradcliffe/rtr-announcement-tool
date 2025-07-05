@@ -138,11 +138,11 @@ else:
         routes.append(route_msg_8k)
         if route_5k_name and link_5k:
             route_msg_5k = f"➡️ 5k – {route_5k_name}: {link_5k}\n  {desc_5k}"
-                if landmarks_5k:
-        route_msg_5k += f"\n  🏞️ This route passes " + ", ".join(landmarks_5k)
-    routes.append(route_msg_5k)
-    if landmarks_5k:
-        routes.append(f"   🏞️ This route passes " + ", ".join(landmarks_5k))
+            if landmarks_5k:
+                route_msg_5k += f"\n  🏞️ This route passes " + ", ".join(landmarks_5k)
+            routes.append(route_msg_5k)
+            if landmarks_5k:
+                routes.append(f"   🏞️ This route passes " + ", ".join(landmarks_5k))
     facebook_msg = "\n".join([
         social_intro,
         tour_msg,
