@@ -31,7 +31,9 @@ df = load_data()
 df.columns = [str(col).strip() for col in df.columns]
 df = df.loc[:, ~df.columns.duplicated(keep="first")]
 
-with st.sidebar
+with st.sidebar:
+    st.write("🧾 Columns in spreadsheet:")
+    st.code(list(df.columns))
     st.write("🧾 Columns in spreadsheet:")
     st.code(list(df.columns))
 
