@@ -8,7 +8,7 @@ st.set_page_config(page_title="RunTogether Radcliffe – Weekly Run Generator", 
 def load_data():
     df = pd.read_excel("RTR route schedule.xlsx", engine="openpyxl")
     df.columns = df.columns.str.strip()
-    df = df.loc[:, ~pd.Series(df.columns).duplicated()]
+    df = df.loc[:, ~df.columns.duplicated()]
     df["Date"] = pd.to_datetime(df["Date"], errors="coerce")
     df = df.dropna(subset=["Date"])
     return df
