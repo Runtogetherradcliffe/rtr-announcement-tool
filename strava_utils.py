@@ -28,6 +28,6 @@ def fetch_route_description(route_url, access_token):
         data = response.json()
         distance_km = round(data.get("distance", 0) / 1000, 1)
         elevation_gain = int(data.get("elevation_gain", 0))
-        return f"{distance_km} km with {elevation_gain}m of climbing"
+        return f"{distance_km} km with {elevation_gain}m of elevation"
     else:
         return f"(⚠️ Could not fetch route details)"
