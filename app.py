@@ -69,10 +69,10 @@ if "radcliffe market" not in meeting_point.lower():
 time = "🕖 We set off at 7:00pm"
 
 # Route description via Strava
-    gpx_data_8k = download_gpx_from_strava_route(link_8k, access_token)
-    desc_8k = extract_landmarks_from_gpx(gpx_data_8k, access_token) if gpx_data_8k else ""
-    gpx_data_5k = download_gpx_from_strava_route(link_5k, access_token)
-    desc_5k = extract_landmarks_from_gpx(gpx_data_5k, access_token) if gpx_data_5k else ""
+gpx_data_8k = download_gpx_from_strava_route(link_8k, access_token)
+desc_8k = extract_landmarks_from_gpx(gpx_data_8k, access_token) if gpx_data_8k else ""
+gpx_data_5k = download_gpx_from_strava_route(link_5k, access_token)
+desc_5k = extract_landmarks_from_gpx(gpx_data_5k, access_token) if gpx_data_5k else ""
 
 route_lines = ["🛣️ This week we’ve got two route options to choose from:"]
 if route_8k_name and link_8k:
