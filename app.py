@@ -8,7 +8,6 @@ from datetime import datetime, timedelta
 from strava_utils import refresh_strava_token, download_gpx_from_strava_route, extract_landmarks_from_gpx
 
 # Load Strava credentials
-creds = {
 try:
     client_id = st.secrets["STRAVA_CLIENT_ID"]
     client_secret = st.secrets["STRAVA_CLIENT_SECRET"]
