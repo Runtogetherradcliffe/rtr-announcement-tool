@@ -35,7 +35,7 @@ def fetch_route_description(route_url, access_token):
         elif elevation_gain < 60:
             comment = "a gently rolling route 🌿"
         else:
-            comment = "a hillier challenge ⛰️"
+            comment = "a few hills this week! ⛰️"
 
         return f"{distance_km} km with {elevation_gain}m of elevation – {comment}"
     else:
