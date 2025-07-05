@@ -4,7 +4,8 @@ import pandas as pd
 import urllib.parse
 import json
 from datetime import datetime, timedelta
-from strava_utils import refresh_strava_token, fetch_route_description
+from strava_utils import extract_landmarks_from_gpx,
+     refresh_strava_token, fetch_route_description
 
 # Load Strava credentials
 creds = {
@@ -56,6 +57,13 @@ time = "🕖 We set off at 7:00pm"
 # Route description via Strava
 desc_8k = fetch_route_description(link_8k, access_token) if link_8k else ""
 desc_5k = fetch_route_description(link_5k, access_token) if link_5k else ""
+
+landmarks_8k = extract_landmarks_from_gpx(gpx_data_8k)
+landmarks_5k = extract_landmarks_from_gpx(gpx_data_5k)
+
+landmark_line_8k = f"🏞️ This route passes {', '.join(landmarks_8k)}." if landmarks_8k else ""
+landmark_line_5k = f"🏞️ This route passes {', '.join(landmarks_5k)}." if landmarks_5k else ""
+
 
 route_lines = ["🛣️ This week we’ve got two route options to choose from:"]
 if route_8k_name and link_8k:
@@ -115,7 +123,7 @@ else:
     social_intro = "🗓️ THIS WEEK’S RUN!"
     routes = []
     if route_8k_name and link_8k:
-        routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}")
+        routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}\n   {landmark_line_8k}")
     if route_5k_name and link_5k:
         routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
     facebook_msg = "\n".join([
