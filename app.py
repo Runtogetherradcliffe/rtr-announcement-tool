@@ -22,7 +22,6 @@ st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
 def load_data():
     df = pd.read_excel("RTR route schedule.xlsx")
     df.columns = df.columns.str.strip()
-    df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
     return df
 
 df = load_data()
