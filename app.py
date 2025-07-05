@@ -35,12 +35,12 @@ client_secret = os.getenv("STRAVA_CLIENT_SECRET")
 refresh_token = os.getenv("STRAVA_REFRESH_TOKEN")
 
 access_token = None
-print("⚠️ No access token set. GPX fetch will be skipped.")
+    st.warning("⚠️ No access token set. GPX fetch will be skipped.")
 if client_id and client_secret and refresh_token:
     try:
         token_data = refresh_strava_token(client_id, client_secret, refresh_token)
         access_token = token_data.get("access_token")
-        print("✅ Access token acquired.")
+        st.write("✅ Access token acquired.")
     except Exception as e:
         st.warning("Could not refresh Strava token: " + str(e))
 today = datetime.today().date()
@@ -72,15 +72,13 @@ time = "🕖 We set off at 7:00pm"
 
 # Route description via Strava
 gpx_data_8k = download_gpx_from_strava_route(link_8k, access_token)
-print(f"✅ Attempting GPX fetch for 8k route: {link_8k}")
+    st.write(f"✅ Attempting GPX fetch for 8k route: {link_8k}")
 desc_8k = extract_landmarks_from_gpx(gpx_data_8k, access_token) if gpx_data_8k else ""
-if not desc_8k:
-    print("⚠️ No landmarks found for 8k route.")
+    st.warning("⚠️ No landmarks found for 8k route.")
 gpx_data_5k = download_gpx_from_strava_route(link_5k, access_token)
-print(f"✅ Attempting GPX fetch for 5k route: {link_5k}")
+    st.write(f"✅ Attempting GPX fetch for 5k route: {link_5k}")
 desc_5k = extract_landmarks_from_gpx(gpx_data_5k, access_token) if gpx_data_5k else ""
-if not desc_5k:
-    print("⚠️ No landmarks found for 5k route.")
+    st.warning("⚠️ No landmarks found for 5k route.")
 
 route_lines = ["🛣️ This week we’ve got two route options to choose from:"]
 if route_8k_name and link_8k:
