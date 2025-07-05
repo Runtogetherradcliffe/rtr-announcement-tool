@@ -9,11 +9,6 @@ from strava_utils import refresh_strava_token, download_gpx_from_strava_route, e
 
 # Load Strava credentials
 creds = {
-    "client_id": st.secrets["client_id"],
-    "client_secret": st.secrets["client_secret"],
-    "refresh_token": st.secrets["refresh_token"]
-}
-
 try:
     client_id = st.secrets["STRAVA_CLIENT_ID"]
     client_secret = st.secrets["STRAVA_CLIENT_SECRET"]
@@ -24,6 +19,12 @@ try:
 except Exception as e:
     st.warning("⚠️ Could not refresh Strava access token. GPX fetch will be skipped.")
     access_token = None
+}
+
+try:
+    st.write("✅ Access token acquired.")
+except Exception as e:
+    st.warning("⚠️ Could not refresh Strava access token. GPX fetch will be skipped.")
 
 st.set_page_config(page_title="RunTogether Radcliffe Weekly Tool", layout="centered")
 st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
@@ -39,7 +40,6 @@ df = load_data()
 
 # Strava credentials from environment (set these in Streamlit secrets or locally)
 
-if client_id and client_secret and refresh_token:
     try:
     st.write("✅ Access token acquired.")
     except Exception as e:
@@ -72,13 +72,9 @@ if "radcliffe market" not in meeting_point.lower():
 time = "🕖 We set off at 7:00pm"
 
 # Route description via Strava
-gpx_data_8k = download_gpx_from_strava_route(link_8k, access_token)
     st.write(f"✅ Attempting GPX fetch for 8k route: {link_8k}")
-desc_8k = extract_landmarks_from_gpx(gpx_data_8k, access_token) if gpx_data_8k else ""
     st.warning("⚠️ No landmarks found for 8k route.")
-gpx_data_5k = download_gpx_from_strava_route(link_5k, access_token)
     st.write(f"✅ Attempting GPX fetch for 5k route: {link_5k}")
-desc_5k = extract_landmarks_from_gpx(gpx_data_5k, access_token) if gpx_data_5k else ""
     st.warning("⚠️ No landmarks found for 5k route.")
 
 route_lines = ["🛣️ This week we’ve got two route options to choose from:"]
