@@ -36,7 +36,14 @@ def fetch_route_description(route_url, access_token):
             difficulty = "a gently rolling route 🌿"
         else:
             difficulty = "a few hills this week! 🔺"
-        return f"{distance_km} km with {elevation}m of elevation – {difficulty}"
+        description = f"{distance_km} km with {elevation}m of elevation – {difficulty}"
+
+        gpx = download_gpx_from_strava_route(route_url, access_token)
+        landmarks = extract_landmarks_from_gpx(gpx)
+        if landmarks:
+            description += f"\n🏞️ This route passes {", ".join(landmarks)}"
+
+        return description
     return ""
 
 def extract_landmarks_from_gpx(gpx_data, max_points=3):
