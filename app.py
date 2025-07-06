@@ -60,10 +60,12 @@ desc_5k = fetch_route_description(link_5k, access_token) if link_5k else ""
 route_lines = ["🛣️ This week we’ve got two route options to choose from:"]
 if route_8k_name and link_8k:
     route_lines.append(f"• 8k – {route_8k_name}: {link_8k}")
-    if desc_8k: route_lines.append(f"  {desc_8k}")
+    if desc_8k:
+        route_lines.append("  " + desc_8k.replace("\n", "\n  "))
 if route_5k_name and link_5k:
     route_lines.append(f"• 5k – {route_5k_name}: {link_5k} (or Jeff it!)")
-    if desc_5k: route_lines.append(f"  {desc_5k}")
+    if desc_5k:
+        route_lines.append("  " + desc_5k.replace("\n", "\n  "))
 route_section = "\n".join(route_lines)
 
 extra_lines = []
