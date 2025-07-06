@@ -31,7 +31,7 @@ def fetch_route_description(route_url, access_token):
         distance_km = round(data.get("distance", 0) / 1000, 1)
         elevation = round(data.get("elevation_gain", 0))
         if elevation < 20:
-            difficulty = "a flat and fast route 🟢"
+            difficulty = "flat as a pancake! 🥞"
         elif elevation < 50:
             difficulty = "a gently rolling route 🌿"
         else:
