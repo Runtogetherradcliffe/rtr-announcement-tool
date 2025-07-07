@@ -1,31 +1,34 @@
-
 import requests
 import gpxpy
-from io import StringIO
+import os
 import json
-from pathlib import Path
+from io import StringIO
 
-cache_path = Path("/mnt/data/landmarks_cache.json")
-if cache_path.exists():
-    with open(cache_path, "r") as f:
-        landmarks_cache = json.load(f)
-else:
-    landmarks_cache = {}
+LANDMARKS_CACHE_PATH = "landmarks_cache.json"
 
-def save_cache():
-    with open(cache_path, "w") as f:
-        json.dump(landmarks_cache, f)
+def load_landmarks_cache():
+    if not os.path.exists(LANDMARKS_CACHE_PATH):
+        with open(LANDMARKS_CACHE_PATH, "w") as f:
+            json.dump({}, f)
+    with open(LANDMARKS_CACHE_PATH, "r") as f:
+        return json.load(f)
+
+def save_landmarks_cache(cache):
+    with open(LANDMARKS_CACHE_PATH, "w") as f:
+        json.dump(cache, f)
 
 def refresh_strava_token(client_id, client_secret, refresh_token):
-    payload = {
-        "client_id": client_id,
-        "client_secret": client_secret,
-        "grant_type": "refresh_token",
-        "refresh_token": refresh_token,
-    }
-    response = requests.post("https://www.strava.com/api/v3/oauth/token", data=payload)
+    response = requests.post(
+        "https://www.strava.com/api/v3/oauth/token",
+        data={
+            "client_id": client_id,
+            "client_secret": client_secret,
+            "grant_type": "refresh_token",
+            "refresh_token": refresh_token,
+        },
+    )
     if response.ok:
-        return response.json().get("access_token")
+        return response.json()["access_token"]
     return None
 
 def download_gpx_from_strava_route(route_url, access_token):
@@ -38,9 +41,6 @@ def download_gpx_from_strava_route(route_url, access_token):
     return None
 
 def fetch_route_description(route_url, access_token):
-    if route_url in landmarks_cache:
-        return landmarks_cache[route_url]
-
     route_id = route_url.strip("/").split("/")[-1]
     headers = {"Authorization": f"Bearer {access_token}"}
     route_api = f"https://www.strava.com/api/v3/routes/{route_id}"
@@ -50,7 +50,7 @@ def fetch_route_description(route_url, access_token):
         distance_km = round(data.get("distance", 0) / 1000, 1)
         elevation = round(data.get("elevation_gain", 0))
         if elevation < 20:
-            difficulty = "flat as a pancake! 🥞"
+            difficulty = "flat as a pancake! 🟢"
         elif elevation < 50:
             difficulty = "a gently rolling route 🌿"
         else:
@@ -58,13 +58,18 @@ def fetch_route_description(route_url, access_token):
 
         description = f"{distance_km} km with {elevation}m of elevation – {difficulty}"
 
-        gpx = download_gpx_from_strava_route(route_url, access_token)
-        landmarks = extract_landmarks_from_gpx(gpx)
+        cache = load_landmarks_cache()
+        if route_id in cache:
+            landmarks = cache[route_id]
+        else:
+            gpx = download_gpx_from_strava_route(route_url, access_token)
+            landmarks = extract_landmarks_from_gpx(gpx)
+            cache[route_id] = landmarks
+            save_landmarks_cache(cache)
+
         if landmarks:
             description += f"\n🏞️ This route passes {', '.join(landmarks)}"
 
-        landmarks_cache[route_url] = description
-        save_cache()
         return description
     return ""
 
@@ -91,10 +96,9 @@ def extract_landmarks_from_gpx(gpx_data, max_points=3):
             res = requests.get(nominatim_url, headers=headers, timeout=5)
             data = res.json()
             if "display_name" in data:
-                display_name = data["display_name"].split(",")[0]
-                if display_name not in landmarks:
-                    landmarks.append(display_name)
+                landmark = data["display_name"].split(",")[0]
+                if landmark and landmark not in landmarks:
+                    landmarks.append(landmark)
         except Exception:
             continue
-
     return landmarks
