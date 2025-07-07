@@ -2,15 +2,31 @@
 import requests
 import gpxpy
 from io import StringIO
+import json
+from pathlib import Path
+
+cache_path = Path("/mnt/data/landmarks_cache.json")
+if cache_path.exists():
+    with open(cache_path, "r") as f:
+        landmarks_cache = json.load(f)
+else:
+    landmarks_cache = {}
+
+def save_cache():
+    with open(cache_path, "w") as f:
+        json.dump(landmarks_cache, f)
 
 def refresh_strava_token(client_id, client_secret, refresh_token):
-    response = requests.post("https://www.strava.com/oauth/token", data={
+    payload = {
         "client_id": client_id,
         "client_secret": client_secret,
         "grant_type": "refresh_token",
         "refresh_token": refresh_token,
-    })
-    return response.json()["access_token"]
+    }
+    response = requests.post("https://www.strava.com/api/v3/oauth/token", data=payload)
+    if response.ok:
+        return response.json().get("access_token")
+    return None
 
 def download_gpx_from_strava_route(route_url, access_token):
     route_id = route_url.strip("/").split("/")[-1]
@@ -22,6 +38,9 @@ def download_gpx_from_strava_route(route_url, access_token):
     return None
 
 def fetch_route_description(route_url, access_token):
+    if route_url in landmarks_cache:
+        return landmarks_cache[route_url]
+
     route_id = route_url.strip("/").split("/")[-1]
     headers = {"Authorization": f"Bearer {access_token}"}
     route_api = f"https://www.strava.com/api/v3/routes/{route_id}"
@@ -36,13 +55,16 @@ def fetch_route_description(route_url, access_token):
             difficulty = "a gently rolling route 🌿"
         else:
             difficulty = "a few hills this week! 🔺"
+
         description = f"{distance_km} km with {elevation}m of elevation – {difficulty}"
 
         gpx = download_gpx_from_strava_route(route_url, access_token)
         landmarks = extract_landmarks_from_gpx(gpx)
         if landmarks:
-            description += f"\n🏞️ This route passes {", ".join(landmarks)}"
+            description += f"\n🏞️ This route passes {', '.join(landmarks)}"
 
+        landmarks_cache[route_url] = description
+        save_cache()
         return description
     return ""
 
@@ -69,9 +91,9 @@ def extract_landmarks_from_gpx(gpx_data, max_points=3):
             res = requests.get(nominatim_url, headers=headers, timeout=5)
             data = res.json()
             if "display_name" in data:
-                place = data["display_name"].split(",")[0]
-                if place not in landmarks:
-                    landmarks.append(place)
+                display_name = data["display_name"].split(",")[0]
+                if display_name not in landmarks:
+                    landmarks.append(display_name)
         except Exception:
             continue
 
