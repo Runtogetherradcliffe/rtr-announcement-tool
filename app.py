@@ -43,15 +43,15 @@ notes = str(row.get("Notes", "")).lower()
 special = str(row.get("Special events", "")).lower()
 events_text = notes + " " + special
 
-intro = " Hope you're having a great week! Here's what we’ve got planned for Thursday…"
-location = f" Meeting at: {meeting_point}" if meeting_point else ""
+intro = "👋 Hope you're having a great week! Here's what we’ve got planned for Thursday…"
+location = f"📍 Meeting at: {meeting_point}" if meeting_point else ""
 tour_msg = ""
 gmaps_line = ""
 if "radcliffe market" not in meeting_point.lower():
     tour_msg = "🚌 We’re on tour this week – meeting somewhere different!"
     if gmaps_link:
         gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
-time = " We set off at 7:00pm"
+time = "🕖 We set off at 7:00pm"
 
 # Route description via Strava
 desc_8k = fetch_route_description(link_8k, access_token) if link_8k else ""
@@ -59,32 +59,32 @@ desc_5k = fetch_route_description(link_5k, access_token) if link_5k else ""
 
 route_lines = ["🛣️ This week we’ve got two route options to choose from:"]
 if route_8k_name and link_8k:
-    route_lines.append(f"- 8k – {route_8k_name}: {link_8k}")
+    route_lines.append(f"• 8k – {route_8k_name}: {link_8k}")
     if desc_8k:
         route_lines.append("  " + desc_8k.replace("\n", "\n  "))
 if route_5k_name and link_5k:
-    route_lines.append(f"- 5k – {route_5k_name}: {link_5k} (or Jeff it!)")
+    route_lines.append(f"• 5k – {route_5k_name}: {link_5k} (or Jeff it!)")
     if desc_5k:
         route_lines.append("  " + desc_5k.replace("\n", "\n  "))
 route_section = "\n".join(route_lines)
 
 extra_lines = []
 if "wear" in events_text and "green" in events_text:
-    extra_lines.append(" It's Wear it Green Day for Mental Health Awareness Week! Join us by wearing something green.")
+    extra_lines.append("🟢 It's Wear it Green Day for Mental Health Awareness Week! Join us by wearing something green.")
 if "pride" in events_text:
     extra_lines.append("🌈 It’s our Pride Run! We’re encouraging everyone to wear something colourful and celebrate together.")
 if "dark" in events_text:
     extra_lines.append("🔦 Don’t forget your hi-vis and headtorch – we’ll be running after dark.")
 if "social" in events_text:
-    extra_lines.append(" Afterwards, we’re heading to Radcliffe Market for a post-run social – come along!")
+    extra_lines.append("🍻 Afterwards, we’re heading to Radcliffe Market for a post-run social – come along!")
 extra_msg = "\n".join(extra_lines)
 
-footer = """ Book now:
+footer = """📲 Book now:
 https://groups.runtogether.co.uk/RunTogetherRadcliffe/Runs
- Can’t make it? Cancel at least 1 hour before:
+❌ Can’t make it? Cancel at least 1 hour before:
 https://groups.runtogether.co.uk/My/BookedRuns"""
 
-signoff = " Grab your shoes, bring your smiles – see you Thursday!"
+signoff = "👟 Grab your shoes, bring your smiles – see you Thursday!"
 
 # Email message
 email_msg = "\n".join([
@@ -95,37 +95,37 @@ email_msg = "\n".join([
 tone = st.radio("Choose Facebook tone", ["Professional", "Social"], key="facebook_tone_selector")
 if tone == "Professional":
     facebook_msg = "\n".join([
-        " This Week’s Run: Thursday @ 7pm",
+        "📣 This Week’s Run: Thursday @ 7pm",
         "",
-        f" Location: {meeting_point}",
+        f"📍 Location: {meeting_point}",
         gmaps_line,
-        " We set off at 7:00pm sharp",
+        "🕖 We set off at 7:00pm sharp",
         "",
         "🛣️ Route Options:",
-        f"- 8k – {route_8k_name}: {link_8k}",
+        f"• 8k – {route_8k_name}: {link_8k}",
         f"  {desc_8k}",
-        f"- 5k – {route_5k_name}: {link_5k} (or Jeff it!)",
+        f"• 5k – {route_5k_name}: {link_5k} (or Jeff it!)",
         f"  {desc_5k}",
         "",
         extra_msg,
         "",
         footer,
         "",
-        " Let us know you're coming!"
+        "👍 Let us know you're coming!"
     ])
 else:
     social_intro = "🗓️ THIS WEEK’S RUN!"
     routes = []
     if route_8k_name and link_8k:
-        routes.append(f"- 8k – {route_8k_name}: {link_8k}\n   {desc_8k}")
+        routes.append(f"➡️ 8k – {route_8k_name}: {link_8k}\n   {desc_8k}")
     if route_5k_name and link_5k:
-        routes.append(f"- 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
+        routes.append(f"➡️ 5k – {route_5k_name}: {link_5k} (or Jeff it!)\n   {desc_5k}")
     facebook_msg = "\n".join([
         social_intro,
         tour_msg,
-        f" WHERE: {meeting_point}",
+        f"📍 WHERE: {meeting_point}",
         gmaps_line,
-        " WHEN: We set off at 7:00pm",
+        "🕖 WHEN: We set off at 7:00pm",
         "",
         "🛣️ ROUTES:",
         *routes,
