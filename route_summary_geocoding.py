@@ -206,3 +206,63 @@ def reverse_geocode_points(coords):
             print(f"⚠️ Geocode error at ({lat}, {lon}): {e}")
             continue
     return pois
+
+
+def query_overpass_parks(lat, lon, radius=50):
+    query = f"""
+    [out:json][timeout:10];
+    (
+      way["leisure"="park"](around:{radius},{lat},{lon});
+      relation["leisure"="park"](around:{radius},{lat},{lon});
+    );
+    out tags center;
+    """
+    try:
+        response = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
+        response.raise_for_status()
+        data = response.json()
+        names = set()
+        for element in data.get("elements", []):
+            tags = element.get("tags", {})
+            name = tags.get("name")
+            if name:
+                names.add(name)
+        return list(names)
+    except Exception as e:
+        print(f"❌ Overpass API error at ({lat}, {lon}): {e}")
+        return []
+
+def reverse_geocode_points(coords):
+    geolocator = Nominatim(user_agent="run_group_app")
+    geocode = RateLimiter(geolocator.reverse, min_delay_seconds=1)
+
+    park_hits = {}
+    seen = set()
+    pois = []
+
+    for lat, lon in coords:
+        park_names = query_overpass_parks(lat, lon)
+        for name in park_names:
+            park_hits[name] = park_hits.get(name, 0) + 1
+
+    # Filter to parks seen in at least 2 locations
+    confirmed_parks = {name for name, count in park_hits.items() if count >= 2}
+    pois.extend(confirmed_parks)
+    seen.update(confirmed_parks)
+
+    for lat, lon in coords:
+        try:
+            location = geocode((lat, lon), exactly_one=True, timeout=10)
+
+            # Suppress road names if park already included
+            if any(p in seen for p in query_overpass_parks(lat, lon)):
+                continue
+
+            name = extract_poi_from_location(location)
+            if name and name not in seen:
+                pois.append(name)
+                seen.add(name)
+        except Exception as e:
+            print(f"⚠️ Geocode error at ({lat}, {lon}): {e}")
+            continue
+    return pois
