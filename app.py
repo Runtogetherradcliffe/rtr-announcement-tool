@@ -1,33 +1,38 @@
-
-import streamlit as st
-import pandas as pd
-import urllib.parse
-import json
-from datetime import datetime, timedelta
-from strava_utils import refresh_strava_token
-from route_summary_geocoding import generate_route_summary
-
-# Load Strava credentials
-creds = {
-    "client_id": st.secrets["client_id"],
-    "client_secret": st.secrets["client_secret"],
-    "refresh_token": st.secrets["refresh_token"]
-}
-
-access_token = refresh_strava_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
-
-st.set_page_config(page_title="RunTogether Radcliffe Weekly Tool", layout="centered")
-st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
-
-@st.cache_data
-def load_data():
-    df = pd.read_excel("RTR route schedule.xlsx")
-    df.columns = df.columns.str.strip()
-    df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
-    return df
-
-df = load_data()
-today = datetime.today().date()
+diff --git a/app.py b/app.py
+index 54da5ba64f30f036dc0f74b573d229729a8ef37d..a8702f6d03a29627d9652f3766960d08c2a30941 100644
+--- a/app.py
++++ b/app.py
+@@ -1,30 +1,29 @@
+ 
+ import streamlit as st
+ import pandas as pd
+ import urllib.parse
+-import json
+ from datetime import datetime, timedelta
+ from strava_utils import refresh_strava_token
+ from route_summary_geocoding import generate_route_summary
+ 
+ # Load Strava credentials
+ creds = {
+     "client_id": st.secrets["client_id"],
+     "client_secret": st.secrets["client_secret"],
+     "refresh_token": st.secrets["refresh_token"]
+ }
+ 
+ access_token = refresh_strava_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
+ 
+ st.set_page_config(page_title="RunTogether Radcliffe Weekly Tool", layout="centered")
+ st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
+ 
+ @st.cache_data
+ def load_data():
+     df = pd.read_excel("RTR route schedule.xlsx")
+     df.columns = df.columns.str.strip()
+     df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
+     return df
+ 
+ df = load_data()
+ today = datetime.today().date()
 next_thursday = today + timedelta((3 - today.weekday()) % 7)
 available_dates = df["Date"].dropna().sort_values().unique().tolist()
 default_index = available_dates.index(next_thursday) if next_thursday in available_dates else 0
