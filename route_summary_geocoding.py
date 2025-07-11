@@ -1,37 +1,48 @@
-
 import requests
 import polyline
+import math
 
 # Constants
 GEOCODE_FIELDS_PRIORITY = ["road", "park", "neighbourhood", "suburb"]
 SAMPLE_DISTANCE_METERS = 300
 LOCATIONIQ_API_KEY = "pk.c820b7e76f37159a448acc812ceefee1"
+MAX_PARK_DISTANCE_METERS = 50
 
 # Cache structure (in memory or replace with persistent storage)
 cache = {}
 
-def query_overpass_parks(lat, lon, radius=50):
+def query_parks_in_bbox(coords):
+    if not coords:
+        return []
+
+    lats = [lat for lat, _ in coords]
+    lons = [lon for _, lon in coords]
+    min_lat, max_lat = min(lats), max(lats)
+    min_lon, max_lon = min(lons), max(lons)
+
     query = f"""
-    [out:json][timeout:10];
+    [out:json][timeout:25];
     (
-      way["leisure"="park"](around:{radius},{lat},{lon});
-      relation["leisure"="park"](around:{radius},{lat},{lon});
+      way["leisure"="park"]({min_lat},{min_lon},{max_lat},{max_lon});
+      relation["leisure"="park"]({min_lat},{min_lon},{max_lat},{max_lon});
     );
     out tags center;
     """
+
     try:
         response = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
         response.raise_for_status()
         data = response.json()
-        names = set()
+        parks = []
         for element in data.get("elements", []):
             tags = element.get("tags", {})
             name = tags.get("name")
-            if name:
-                names.add(name)
-        return list(names)
+            center = element.get("center")
+            if name and center:
+                parks.append((name, (center["lat"], center["lon"])))
+        return parks
     except Exception as e:
-        print(f"❌ Overpass API error at ({lat}, {lon}): {e}")
+        print(f"❌ Overpass API (bbox) error: {e}")
         return []
 
 def locationiq_reverse_geocode(lat, lon):
@@ -52,6 +63,16 @@ def locationiq_reverse_geocode(lat, lon):
         print(f"⚠️ LocationIQ geocode error at ({lat}, {lon}): {e}")
         return None
 
+def haversine(coord1, coord2):
+    R = 6371000  # radius of Earth in meters
+    lat1, lon1 = map(math.radians, coord1)
+    lat2, lon2 = map(math.radians, coord2)
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
 def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
     sampled = []
     if not coords:
@@ -60,7 +81,7 @@ def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
     sampled.append(last)
     accum_dist = 0
     for point in coords[1:]:
-        dist = geodesic(last, point).meters
+        dist = haversine(last, point)
         accum_dist += dist
         if accum_dist >= sample_distance_m:
             sampled.append(point)
@@ -69,26 +90,28 @@ def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
     return sampled
 
 def reverse_geocode_points(coords):
-    park_hits = {}
-    seen = set()
-    pois = []
+    sampled = sample_coords(coords)
+    nearby_parks = query_parks_in_bbox(sampled)
 
-    for lat, lon in coords:
-        park_names = query_overpass_parks(lat, lon)
-        for name in park_names:
-            park_hits[name] = park_hits.get(name, 0) + 1
+    # Only keep parks that are within MAX_PARK_DISTANCE_METERS from any sampled point
+    filtered_parks = []
+    for name, park_coord in nearby_parks:
+        if any(haversine(park_coord, pt) <= MAX_PARK_DISTANCE_METERS for pt in sampled):
+            filtered_parks.append(name)
 
-    confirmed_parks = {name for name, count in park_hits.items() if count >= 2}
-    pois.extend(confirmed_parks)
-    seen.update(confirmed_parks)
+    seen = set(filtered_parks)
+    pois = list(filtered_parks)
 
-    for lat, lon in coords:
-        if any(p in seen for p in query_overpass_parks(lat, lon)):
-            continue
+    # Limit LocationIQ lookups to 3 to avoid API overload
+    locationiq_lookups = 0
+    for lat, lon in sampled:
+        if locationiq_lookups >= 3:
+            break
         name = locationiq_reverse_geocode(lat, lon)
         if name and name not in seen:
             pois.append(name)
             seen.add(name)
+            locationiq_lookups += 1
 
     return pois
 
@@ -142,15 +165,16 @@ def generate_route_summary(route_url, access_token):
         if route_id in cache:
             pois = cache[route_id]
         else:
-            sampled = sample_coords(coords)
-            pois = reverse_geocode_points(sampled)
+            pois = reverse_geocode_points(coords)
             cache[route_id] = pois
             save_cache()
 
         if pois:
-            return f"{dist_summary}\n🏞️ This route passes " + ", ".join(pois[:5]) + "."
+            return f"{dist_summary}
+🏞️ This route passes " + ", ".join(pois[:5]) + "."
         else:
-            return f"{dist_summary}\n🏞️ This route explores some scenic areas."
+            return f"{dist_summary}
+🏞️ This route explores some scenic areas."
     except Exception as e:
         print(f"Error generating route summary: {e}")
         return "🏞️ Route summary unavailable."
