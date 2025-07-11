@@ -1,100 +1,105 @@
-
+import time
 import requests
 import gpxpy
-import time
+import polyline
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
-from io import StringIO
 
-def fetch_gpx_from_strava(route_url: str) -> str:
+# Constants
+GEOCODE_FIELDS_PRIORITY = ["road", "park", "neighbourhood", "suburb"]
+SAMPLE_DISTANCE_METERS = 300
+
+
+def fetch_route_coords_from_strava(route_url, access_token):
     """
-    Attempts to fetch GPX file from a public Strava route page.
+    Fetches route coordinates from Strava API using access token.
     """
     try:
         route_id = route_url.strip("/").split("/")[-1]
-        gpx_export_url = f"https://www.strava.com/routes/{route_id}/gpx"
-        response = requests.get(gpx_export_url)
+        print(f"🔍 Fetching route ID: {route_id}")
+        api_url = f"https://www.strava.com/api/v3/routes/{route_id}"
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = requests.get(api_url, headers=headers)
+        print(f"🔁 Strava API status: {response.status_code}")
+        if response.status_code != 200:
+            print(f"❌ Error response: {response.text}")
         response.raise_for_status()
-        return response.text
-    except Exception as e:
-        print(f"❌ Failed to fetch GPX: {e}")
-        return None
+        data = response.json()
 
-def parse_gpx_points(gpx_data: str, spacing_m: int = 300) -> list:
-    """
-    Parses GPX data and returns lat/lon points spaced approximately every `spacing_m` meters.
-    """
-    try:
-        gpx = gpxpy.parse(gpx_data)
-        points = []
-        total_distance = 0
-        last_point = None
+        polyline_str = data.get("map", {}).get("polyline")
+        if not polyline_str:
+            print("⚠️ No polyline found in route data.")
+            return []
 
-        for track in gpx.tracks:
-            for segment in track.segments:
-                for point in segment.points:
-                    if last_point is None:
-                        points.append((point.latitude, point.longitude))
-                        last_point = point
-                    else:
-                        dist = point.distance_2d(last_point)
-                        total_distance += dist
-                        if total_distance >= spacing_m:
-                            points.append((point.latitude, point.longitude))
-                            total_distance = 0
-                            last_point = point
-        return points
+        coords = polyline.decode(polyline_str)
+        print(f"✅ Retrieved {len(coords)} coordinates from Strava route.")
+        return coords
     except Exception as e:
-        print(f"❌ Failed to parse GPX: {e}")
+        print(f"❌ Failed to fetch route from Strava API: {e}")
         return []
 
-def reverse_geocode_points(points: list, max_pois: int = 5) -> list:
+
+def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
     """
-    Reverse geocodes lat/lon points to place/road names using OpenStreetMap.
+    Sample route coordinates every ~sample_distance_m.
     """
-    geolocator = Nominatim(user_agent="rtr-geocoder")
+    sampled = []
+    if not coords:
+        return sampled
+
+    last = coords[0]
+    sampled.append(last)
+    accum_dist = 0
+
+    from geopy.distance import geodesic
+
+    for point in coords[1:]:
+        dist = geodesic(last, point).meters
+        accum_dist += dist
+        if accum_dist >= sample_distance_m:
+            sampled.append(point)
+            last = point
+            accum_dist = 0
+
+    return sampled
+
+
+def reverse_geocode_points(coords):
+    """
+    Use OpenStreetMap's Nominatim to reverse geocode each coordinate.
+    """
+    geolocator = Nominatim(user_agent="run_group_app")
     geocode = RateLimiter(geolocator.reverse, min_delay_seconds=1)
 
-    seen = set()
-    pois = []
-
-    for lat, lon in points:
+    pois = set()
+    for lat, lon in coords:
         try:
-            location = geocode((lat, lon), exactly_one=True, language='en')
-            if not location:
-                continue
-
-            data = location.raw.get('address', {})
-            for key in ['road', 'neighbourhood', 'suburb', 'park']:
-                value = data.get(key)
-                if value and value not in seen:
-                    pois.append(value)
-                    seen.add(value)
-                    break
-
-            if len(pois) >= max_pois:
-                break
+            location = geocode((lat, lon), exactly_one=True, timeout=10)
+            if location and location.raw and "address" in location.raw:
+                address = location.raw["address"]
+                for key in GEOCODE_FIELDS_PRIORITY:
+                    if key in address:
+                        pois.add(address[key])
+                        break
         except Exception as e:
-            print(f"⚠️ Geocode error: {e}")
+            print(f"Geocoding error at ({lat}, {lon}): {e}")
             continue
+    return list(pois)
 
-    return pois
 
-def generate_route_summary(strava_url: str) -> str:
-    """
-    Full pipeline: fetch route from Strava, parse and geocode to generate summary.
-    """
-    gpx_data = fetch_gpx_from_strava(strava_url)
-    if not gpx_data:
+def generate_route_summary(route_url, access_token):
+    coords = fetch_route_coords_from_strava(route_url, access_token)
+    if not coords:
         return "📍 Could not load route data."
 
-    points = parse_gpx_points(gpx_data)
-    if not points:
-        return "📍 Route data could not be parsed."
-
-    pois = reverse_geocode_points(points)
-    if not pois:
-        return "📍 Could not identify major points of interest."
-
-    summary = "🏞️ This route passes " + ", ".join(pois[:-1]) + f", and {pois[-1]}." if len(pois) > 1 else f"🏞️ This route passes {pois[0]}."
-    return summary
+    try:
+        sampled = sample_coords(coords)
+        pois = reverse_geocode_points(sampled)
+        if pois:
+            summary = "🏞️ This route passes " + ", ".join(pois[:5]) + "."
+        else:
+            summary = "🏞️ This route explores some scenic areas."
+        return summary
+    except Exception as e:
+        print(f"Error generating route summary: {e}")
+        return "🏞️ Route summary unavailable."
