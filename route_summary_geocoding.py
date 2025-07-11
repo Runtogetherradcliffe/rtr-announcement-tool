@@ -98,3 +98,40 @@ def generate_route_summary(route_url, access_token):
         return "🏞️ This route passes " + ", ".join(pois[:5]) + "."
     else:
         return "🏞️ This route explores some scenic areas."
+
+import pandas as pd
+
+def extract_route_links_from_schedule(schedule_path, days_ahead=30):
+    df = pd.read_excel(schedule_path)
+    today = datetime.today()
+    end_date = today + timedelta(days=days_ahead)
+
+    route_links = set()
+    for _, row in df.iterrows():
+        try:
+            route_date = pd.to_datetime(row.get("Date"))
+            if today <= route_date <= end_date:
+                link_5k = str(row.get("Link_5k", "")).strip()
+                link_8k = str(row.get("Link_8k", "")).strip()
+                if link_5k.startswith("http"):
+                    route_links.add(link_5k)
+                if link_8k.startswith("http"):
+                    route_links.add(link_8k)
+        except Exception as e:
+            print(f"⚠️ Error reading row: {e}")
+            continue
+    return list(route_links)
+
+def preload_route_summaries(schedule_path, access_token, days_ahead=30):
+    upcoming_links = extract_route_links_from_schedule(schedule_path, days_ahead)
+    print(f"🗂️ Preloading {len(upcoming_links)} routes from the next {days_ahead} days.")
+    for link in upcoming_links:
+        coords, route_id = fetch_route_coords_from_strava(link, access_token)
+        if coords and route_id and route_id not in cache:
+            sampled = sample_coords(coords)
+            pois = reverse_geocode_points(sampled)
+            cache[route_id] = pois
+            save_cache()
+            print(f"✅ Cached POIs for route {route_id}")
+        else:
+            print(f"ℹ️ Route {route_id} already cached or unavailable.")
