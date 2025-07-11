@@ -464,3 +464,51 @@ def generate_route_summary(route_url, access_token):
     except Exception as e:
         print(f"Error generating route summary: {e}")
         return "🏞️ Route summary unavailable."
+
+import requests
+
+LOCATIONIQ_API_KEY = "pk.c820b7e76f37159a448acc812ceefee1"
+
+def locationiq_reverse_geocode(lat, lon):
+    try:
+        url = f"https://us1.locationiq.com/v1/reverse?key={LOCATIONIQ_API_KEY}&lat={lat}&lon={lon}&format=json"
+        response = requests.get(url, timeout=5)
+        response.raise_for_status()
+        data = response.json()
+        address = data.get("address", {})
+        display_name = data.get("display_name", "")
+        # Prioritize specific POI fields
+        for field in ["road", "neighbourhood", "suburb", "park", "leisure"]:
+            if field in address:
+                return address[field]
+        # Fallback: extract something reasonable from display_name
+        if "," in display_name:
+            return display_name.split(",")[0]
+        return None
+    except Exception as e:
+        print(f"⚠️ LocationIQ geocode error at ({lat}, {lon}): {e}")
+        return None
+
+def reverse_geocode_points(coords):
+    park_hits = {}
+    seen = set()
+    pois = []
+
+    for lat, lon in coords:
+        park_names = query_overpass_parks(lat, lon)
+        for name in park_names:
+            park_hits[name] = park_hits.get(name, 0) + 1
+
+    confirmed_parks = {name for name, count in park_hits.items() if count >= 2}
+    pois.extend(confirmed_parks)
+    seen.update(confirmed_parks)
+
+    for lat, lon in coords:
+        if any(p in seen for p in query_overpass_parks(lat, lon)):
+            continue
+        name = locationiq_reverse_geocode(lat, lon)
+        if name and name not in seen:
+            pois.append(name)
+            seen.add(name)
+
+    return pois
