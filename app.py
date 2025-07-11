@@ -1,63 +1,98 @@
 diff --git a/app.py b/app.py
-index 54da5ba64f30f036dc0f74b573d229729a8ef37d..a8702f6d03a29627d9652f3766960d08c2a30941 100644
+index 3008e1ba47415d4b87fe087c1652b762b7c5fa9c..7a4a24753c510c6ada6e5ed300d3742df8472a36 100644
 --- a/app.py
 +++ b/app.py
-@@ -1,30 +1,29 @@
+@@ -1,60 +1,54 @@
+-diff --git a/app.py b/app.py
+-index 54da5ba64f30f036dc0f74b573d229729a8ef37d..a8702f6d03a29627d9652f3766960d08c2a30941 100644
+---- a/app.py
+-+++ b/app.py
+-@@ -1,30 +1,29 @@
+- 
+- import streamlit as st
+- import pandas as pd
+- import urllib.parse
+--import json
+- from datetime import datetime, timedelta
+- from strava_utils import refresh_strava_token
+- from route_summary_geocoding import generate_route_summary
+- 
+- # Load Strava credentials
+- creds = {
+-     "client_id": st.secrets["client_id"],
+-     "client_secret": st.secrets["client_secret"],
+-     "refresh_token": st.secrets["refresh_token"]
+- }
+- 
+- access_token = refresh_strava_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
+- 
+- st.set_page_config(page_title="RunTogether Radcliffe Weekly Tool", layout="centered")
+- st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
+- 
+- @st.cache_data
+- def load_data():
+-     df = pd.read_excel("RTR route schedule.xlsx")
+-     df.columns = df.columns.str.strip()
+-     df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
+-     return df
+- 
+- df = load_data()
+- today = datetime.today().date()
++import streamlit as st
++import pandas as pd
++import urllib.parse
++from datetime import datetime, timedelta
++from strava_utils import refresh_strava_token
++from route_summary_geocoding import generate_route_summary
++
++# Load Strava credentials
++creds = {
++    "client_id": st.secrets["client_id"],
++    "client_secret": st.secrets["client_secret"],
++    "refresh_token": st.secrets["refresh_token"]
++}
++
++access_token = refresh_strava_token(
++    creds["client_id"], creds["client_secret"], creds["refresh_token"])
++
++st.set_page_config(page_title="RunTogether Radcliffe Weekly Tool", layout="centered")
++st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
++
++@st.cache_data
++def load_data():
++    df = pd.read_excel("RTR route schedule.xlsx")
++    df.columns = df.columns.str.strip()
++    df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
++    return df
++
++df = load_data()
++today = datetime.today().date()
+ next_thursday = today + timedelta((3 - today.weekday()) % 7)
+ available_dates = df["Date"].dropna().sort_values().unique().tolist()
+ default_index = available_dates.index(next_thursday) if next_thursday in available_dates else 0
+ selected_date = st.selectbox("Select run date:", available_dates, index=default_index)
  
- import streamlit as st
- import pandas as pd
- import urllib.parse
--import json
- from datetime import datetime, timedelta
- from strava_utils import refresh_strava_token
- from route_summary_geocoding import generate_route_summary
+ row = df[df["Date"] == selected_date].iloc[0]
+ meeting_point = row.get("Meeting point", "")
+ gmaps_link = row.get("Meeting point google link", "")
+ route_8k_name = row.get("8k Route", "")
+ route_5k_name = row.get("5k Route", "")
+ link_8k = row.get("8k Strava link", "")
+ link_5k = row.get("5k Strava link", "")
+ notes = str(row.get("Notes", "")).lower()
+ special = str(row.get("Special events", "")).lower()
+ events_text = notes + " " + special
  
- # Load Strava credentials
- creds = {
-     "client_id": st.secrets["client_id"],
-     "client_secret": st.secrets["client_secret"],
-     "refresh_token": st.secrets["refresh_token"]
- }
- 
- access_token = refresh_strava_token(creds["client_id"], creds["client_secret"], creds["refresh_token"])
- 
- st.set_page_config(page_title="RunTogether Radcliffe Weekly Tool", layout="centered")
- st.title("🏃‍♀️ RunTogether Radcliffe – Weekly Run Generator")
- 
- @st.cache_data
- def load_data():
-     df = pd.read_excel("RTR route schedule.xlsx")
-     df.columns = df.columns.str.strip()
-     df["Date"] = pd.to_datetime(df["2025 Date"], errors="coerce").dt.date
-     return df
- 
- df = load_data()
- today = datetime.today().date()
-next_thursday = today + timedelta((3 - today.weekday()) % 7)
-available_dates = df["Date"].dropna().sort_values().unique().tolist()
-default_index = available_dates.index(next_thursday) if next_thursday in available_dates else 0
-selected_date = st.selectbox("Select run date:", available_dates, index=default_index)
+ intro = "👋 Hope you're having a great week! Here's what we’ve got planned for Thursday…"
+ location = f"📍 Meeting at: {meeting_point}" if meeting_point else ""
+ tour_msg = ""
+ gmaps_line = ""
+ if "radcliffe market" not in meeting_point.lower():
+     tour_msg = "🚌 We’re on tour this week – meeting somewhere different!"
+     if gmaps_link:
+         gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
+ time = "🕖 We set off at 7:00pm"
 
-row = df[df["Date"] == selected_date].iloc[0]
-meeting_point = row.get("Meeting point", "")
-gmaps_link = row.get("Meeting point google link", "")
-route_8k_name = row.get("8k Route", "")
-route_5k_name = row.get("5k Route", "")
-link_8k = row.get("8k Strava link", "")
-link_5k = row.get("5k Strava link", "")
-notes = str(row.get("Notes", "")).lower()
-special = str(row.get("Special events", "")).lower()
-events_text = notes + " " + special
-
-intro = "👋 Hope you're having a great week! Here's what we’ve got planned for Thursday…"
-location = f"📍 Meeting at: {meeting_point}" if meeting_point else ""
-tour_msg = ""
-gmaps_line = ""
-if "radcliffe market" not in meeting_point.lower():
-    tour_msg = "🚌 We’re on tour this week – meeting somewhere different!"
-    if gmaps_link:
-        gmaps_line = f"🗺️ Google Maps: {gmaps_link}"
-time = "🕖 We set off at 7:00pm"
 
 # Route description via Strava
 desc_8k = generate_route_summary(link_8k, access_token) if link_8k else ""
