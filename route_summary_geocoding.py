@@ -10,15 +10,24 @@ LOCATIONIQ_API_KEY = "pk.c820b7e76f37159a448acc812ceefee1"
 # Cache structure (in memory or replace with persistent storage)
 cache = {}
 
-def query_overpass_parks(lat, lon, radius=50):
+def query_parks_in_bbox(coords):
+    if not coords:
+        return []
+
+    lats = [lat for lat, _ in coords]
+    lons = [lon for _, lon in coords]
+    min_lat, max_lat = min(lats), max(lats)
+    min_lon, max_lon = min(lons), max(lons)
+
     query = f"""
-    [out:json][timeout:10];
+    [out:json][timeout:25];
     (
-      way["leisure"="park"](around:{radius},{lat},{lon});
-      relation["leisure"="park"](around:{radius},{lat},{lon});
+      way["leisure"="park"]({min_lat},{min_lon},{max_lat},{max_lon});
+      relation["leisure"="park"]({min_lat},{min_lon},{max_lat},{max_lon});
     );
     out tags center;
     """
+
     try:
         response = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
         response.raise_for_status()
@@ -31,7 +40,7 @@ def query_overpass_parks(lat, lon, radius=50):
                 names.add(name)
         return list(names)
     except Exception as e:
-        print(f"❌ Overpass API error at ({lat}, {lon}): {e}")
+        print(f"❌ Overpass API (bbox) error: {e}")
         return []
 
 def locationiq_reverse_geocode(lat, lon):
@@ -79,26 +88,20 @@ def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
     return sampled
 
 def reverse_geocode_points(coords):
-    park_hits = {}
-    seen = set()
-    pois = []
+    park_names = query_parks_in_bbox(coords)
+    seen = set(park_names)
+    pois = list(park_names)
 
-    for lat, lon in coords:
-        park_names = query_overpass_parks(lat, lon)
-        for name in park_names:
-            park_hits[name] = park_hits.get(name, 0) + 1
-
-    confirmed_parks = {name for name, count in park_hits.items() if count >= 2}
-    pois.extend(confirmed_parks)
-    seen.update(confirmed_parks)
-
-    for lat, lon in coords:
-        if any(p in seen for p in query_overpass_parks(lat, lon)):
-            continue
+    # Limit LocationIQ lookups to 3 to avoid API overload
+    locationiq_lookups = 0
+    for lat, lon in sample_coords(coords):
+        if locationiq_lookups >= 3:
+            break
         name = locationiq_reverse_geocode(lat, lon)
         if name and name not in seen:
             pois.append(name)
             seen.add(name)
+            locationiq_lookups += 1
 
     return pois
 
@@ -152,8 +155,7 @@ def generate_route_summary(route_url, access_token):
         if route_id in cache:
             pois = cache[route_id]
         else:
-            sampled = sample_coords(coords)
-            pois = reverse_geocode_points(sampled)
+            pois = reverse_geocode_points(coords)
             cache[route_id] = pois
             save_cache()
 
