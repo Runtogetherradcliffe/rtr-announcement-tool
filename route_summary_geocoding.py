@@ -320,3 +320,40 @@ def generate_route_summary(route_url, access_token):
     except Exception as e:
         print(f"Error generating route summary: {e}")
         return "🏞️ Route summary unavailable."
+
+def get_elevation_comment(elev_m):
+    if elev_m <= 20:
+        return "flat as a pancake 🥞"
+    elif elev_m <= 50:
+        return "gently undulating 🌿"
+    elif elev_m <= 100:
+        return "a few hills this week! 🔺"
+    else:
+        return "hilly route – legs ready? ⛰️"
+
+def generate_route_summary(route_url, access_token):
+    coords, route_id = fetch_route_coords_from_strava(route_url, access_token)
+    if not coords or not route_id:
+        return "📍 Could not load route data."
+
+    try:
+        # Distance and elevation
+        dist_km, elev_m = calculate_distance_and_elevation([(lat, lon) for lat, lon in coords])
+        elevation_msg = get_elevation_comment(elev_m)
+        dist_summary = f"{dist_km} km with {elev_m}m of elevation – {elevation_msg}"
+
+        if route_id in cache:
+            pois = cache[route_id]
+        else:
+            sampled = sample_coords(coords)
+            pois = reverse_geocode_points(sampled)
+            cache[route_id] = pois
+            save_cache()
+
+        if pois:
+            return f"{dist_summary}\n🏞️ This route passes " + ", ".join(pois[:5]) + "."
+        else:
+            return f"{dist_summary}\n🏞️ This route explores some scenic areas."
+    except Exception as e:
+        print(f"Error generating route summary: {e}")
+        return "🏞️ Route summary unavailable."
