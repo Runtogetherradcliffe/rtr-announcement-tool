@@ -1,7 +1,8 @@
 streamlit
 pandas
 requests
-openpyxl
-gpxpy
 geopy
+gpxpy
+polyline
+openpyxl
 
