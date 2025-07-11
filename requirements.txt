@@ -2,5 +2,6 @@ streamlit
 requests
 polyline
 gpxpy
+openpyxl
 
 
