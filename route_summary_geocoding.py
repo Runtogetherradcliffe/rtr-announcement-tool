@@ -1,19 +1,30 @@
+
 import time
 import requests
 import gpxpy
 import polyline
+import json
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
+from geopy.distance import geodesic
 
 # Constants
 GEOCODE_FIELDS_PRIORITY = ["road", "park", "neighbourhood", "suburb"]
-SAMPLE_DISTANCE_METERS = 300
+SAMPLE_DISTANCE_METERS = 800
+CACHE_FILE = "landmarks_cache.json"
 
+# Load or initialize cache
+try:
+    with open(CACHE_FILE, "r") as f:
+        cache = json.load(f)
+except FileNotFoundError:
+    cache = {}
+
+def save_cache():
+    with open(CACHE_FILE, "w") as f:
+        json.dump(cache, f, indent=2)
 
 def fetch_route_coords_from_strava(route_url, access_token):
-    """
-    Fetches route coordinates from Strava API using access token.
-    """
     try:
         route_id = route_url.strip("/").split("/")[-1]
         print(f"🔍 Fetching route ID: {route_id}")
@@ -25,34 +36,23 @@ def fetch_route_coords_from_strava(route_url, access_token):
             print(f"❌ Error response: {response.text}")
         response.raise_for_status()
         data = response.json()
-
         polyline_str = data.get("map", {}).get("polyline")
         if not polyline_str:
             print("⚠️ No polyline found in route data.")
-            return []
-
+            return [], route_id
         coords = polyline.decode(polyline_str)
-        print(f"✅ Retrieved {len(coords)} coordinates from Strava route.")
-        return coords
+        print(f"✅ Retrieved {len(coords)} coordinates.")
+        return coords, route_id
     except Exception as e:
-        print(f"❌ Failed to fetch route from Strava API: {e}")
-        return []
-
+        print(f"❌ Failed to fetch route: {e}")
+        return [], None
 
 def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
-    """
-    Sample route coordinates every ~sample_distance_m.
-    """
-    sampled = []
     if not coords:
-        return sampled
-
+        return []
+    sampled = [coords[0]]
     last = coords[0]
-    sampled.append(last)
     accum_dist = 0
-
-    from geopy.distance import geodesic
-
     for point in coords[1:]:
         dist = geodesic(last, point).meters
         accum_dist += dist
@@ -60,46 +60,39 @@ def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
             sampled.append(point)
             last = point
             accum_dist = 0
-
     return sampled
 
-
 def reverse_geocode_points(coords):
-    """
-    Use OpenStreetMap's Nominatim to reverse geocode each coordinate.
-    """
     geolocator = Nominatim(user_agent="run_group_app")
     geocode = RateLimiter(geolocator.reverse, min_delay_seconds=1)
-
     pois = set()
     for lat, lon in coords:
         try:
             location = geocode((lat, lon), exactly_one=True, timeout=10)
-            if location and location.raw and "address" in location.raw:
-                address = location.raw["address"]
+            if location and "address" in location.raw:
                 for key in GEOCODE_FIELDS_PRIORITY:
-                    if key in address:
-                        pois.add(address[key])
+                    val = location.raw["address"].get(key)
+                    if val:
+                        pois.add(val)
                         break
         except Exception as e:
-            print(f"Geocoding error at ({lat}, {lon}): {e}")
+            print(f"⚠️ Geocode error at ({lat}, {lon}): {e}")
             continue
     return list(pois)
 
-
 def generate_route_summary(route_url, access_token):
-    coords = fetch_route_coords_from_strava(route_url, access_token)
-    if not coords:
+    coords, route_id = fetch_route_coords_from_strava(route_url, access_token)
+    if not coords or not route_id:
         return "📍 Could not load route data."
-
-    try:
+    if route_id in cache:
+        print(f"📦 Loaded POIs from cache for route {route_id}")
+        pois = cache[route_id]
+    else:
         sampled = sample_coords(coords)
         pois = reverse_geocode_points(sampled)
-        if pois:
-            summary = "🏞️ This route passes " + ", ".join(pois[:5]) + "."
-        else:
-            summary = "🏞️ This route explores some scenic areas."
-        return summary
-    except Exception as e:
-        print(f"Error generating route summary: {e}")
-        return "🏞️ Route summary unavailable."
+        cache[route_id] = pois
+        save_cache()
+    if pois:
+        return "🏞️ This route passes " + ", ".join(pois[:5]) + "."
+    else:
+        return "🏞️ This route explores some scenic areas."
