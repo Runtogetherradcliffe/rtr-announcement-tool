@@ -1,6 +1,5 @@
 import streamlit as st
 import pandas as pd
-import datetime
 import os
 import sys
 
@@ -16,55 +15,46 @@ except ImportError as e:
 
 from strava_utils import get_strava_access_token
 
-st.set_page_config(page_title="RunTogether Route Announcements", layout="wide")
-
 @st.cache_data
 def load_data():
     df = pd.read_excel("RTR route schedule.xlsx")
-    df["Date"] = pd.to_datetime(df["Date"]).dt.date
+    df = df[df["5k Strava link"].notnull() | df["8k Strava link"].notnull()]
     return df
 
-def get_upcoming_runs(df, num_weeks=1):
-    today = datetime.date.today()
-    upcoming = df[(df["Date"] >= today)].sort_values("Date").head(num_weeks)
-    return upcoming
+st.title("🏃 Weekly Run Announcement Generator")
 
-def build_announcement(df, access_token):
+df = load_data()
+access_token = get_strava_access_token()
+
+output_lines = []
+
+for _, row in df.iterrows():
     messages = []
-    for _, row in df.iterrows():
-        date = row["Date"]
-        title = row["Title"]
-        link = row["Strava Route Link"]
-        summary = generate_route_summary(link, access_token)
-        date_str = f"{title}: {link}" if pd.notna(link) else f"{title}"
-        messages.append(f"• {date_str}\n  {summary}")
-    return messages
+    if pd.notna(row.get("8k Strava link")):
+        name = row.get("8k Route", "8k route")
+        url = row["8k Strava link"]
+        note = row.get("Notes", "")
+        summary = generate_route_summary(url, access_token)
+        line = f"• 8k – {name}: {url}"
+        if note:
+            line += f" ({note})"
+        messages.append(f"{line}
+  {summary}")
 
-def main():
-    st.title("🏃 RunTogether Announcement Generator")
+    if pd.notna(row.get("5k Strava link")):
+        name = row.get("5k Route", "5k route")
+        url = row["5k Strava link"]
+        note = row.get("Notes", "")
+        summary = generate_route_summary(url, access_token)
+        line = f"• 5k – {name}: {url}"
+        if note:
+            line += f" ({note})"
+        messages.append(f"{line}
+  {summary}")
 
-    df = load_data()
-    access_token = get_strava_access_token()
+    if messages:
+        output_lines.append("🛣️ This week we’ve got two route options to choose from:
+" + "
+".join(messages))
 
-    st.sidebar.markdown("## Settings")
-    num_weeks = st.sidebar.slider("How many weeks to show?", 1, 6, 2)
-
-    upcoming = get_upcoming_runs(df, num_weeks=num_weeks)
-
-    if upcoming.empty:
-        st.warning("No upcoming runs found.")
-        return
-
-    st.markdown("### 📣 Weekly Route Announcements")
-    announcements = build_announcement(upcoming, access_token)
-    announcement_text = (
-        "🛣️ This week we’ve got two route options to choose from:\n" + "\n".join(announcements)
-        if len(announcements) > 1
-        else announcements[0]
-    )
-
-    st.text_area("Generated Announcement", value=announcement_text, height=300)
-    st.code(announcement_text, language="markdown")
-
-if __name__ == "__main__":
-    main()
+st.text_area("📣 Weekly Announcement", value="\n\n".join(output_lines), height=500)
