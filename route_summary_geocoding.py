@@ -1,7 +1,6 @@
 
 import requests
 import polyline
-from geopy.distance import geodesic
 
 # Constants
 GEOCODE_FIELDS_PRIORITY = ["road", "park", "neighbourhood", "suburb"]
