@@ -170,11 +170,15 @@ def generate_route_summary(route_url, access_token):
             save_cache()
 
         if pois:
-            return f"{dist_summary}
-🏞️ This route passes " + ", ".join(pois[:5]) + "."
+            return (
+                f"{dist_summary}\n"
+                "🏞️ This route passes " + ", ".join(pois[:5]) + "."
+            )
         else:
-            return f"{dist_summary}
-🏞️ This route explores some scenic areas."
+            return (
+                f"{dist_summary}\n"
+                "🏞️ This route explores some scenic areas."
+            )
     except Exception as e:
         print(f"Error generating route summary: {e}")
         return "🏞️ Route summary unavailable."
