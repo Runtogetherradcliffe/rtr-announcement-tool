@@ -155,3 +155,54 @@ def preload_route_summaries(schedule_path, access_token, days_ahead=30):
             print(f"✅ Cached POIs for route {route_id}")
         else:
             print(f"ℹ️ Route {route_id} already cached or unavailable.")
+
+
+import requests
+
+def query_overpass_parks(lat, lon, radius=100):
+    query = f"""
+    [out:json][timeout:10];
+    (
+      way["leisure"="park"](around:{radius},{lat},{lon});
+      relation["leisure"="park"](around:{radius},{lat},{lon});
+    );
+    out tags center;
+    """
+    try:
+        response = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
+        response.raise_for_status()
+        data = response.json()
+        names = set()
+        for element in data.get("elements", []):
+            tags = element.get("tags", {})
+            name = tags.get("name")
+            if name:
+                names.add(name)
+        return list(names)
+    except Exception as e:
+        print(f"❌ Overpass API error at ({lat}, {lon}): {e}")
+        return []
+
+def reverse_geocode_points(coords):
+    geolocator = Nominatim(user_agent="run_group_app")
+    geocode = RateLimiter(geolocator.reverse, min_delay_seconds=1)
+    pois = []
+    seen = set()
+    for lat, lon in coords:
+        # Check for park using Overpass first
+        parks = query_overpass_parks(lat, lon)
+        for park in parks:
+            if park not in seen:
+                pois.append(park)
+                seen.add(park)
+
+        try:
+            location = geocode((lat, lon), exactly_one=True, timeout=10)
+            name = extract_poi_from_location(location)
+            if name and name not in seen:
+                pois.append(name)
+                seen.add(name)
+        except Exception as e:
+            print(f"⚠️ Geocode error at ({lat}, {lon}): {e}")
+            continue
+    return pois
