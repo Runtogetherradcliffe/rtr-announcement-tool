@@ -266,3 +266,57 @@ def reverse_geocode_points(coords):
             print(f"⚠️ Geocode error at ({lat}, {lon}): {e}")
             continue
     return pois
+
+from geopy.distance import geodesic
+
+def calculate_distance_and_elevation(coords):
+    total_distance_km = 0.0
+    total_elevation_gain = 0.0
+    previous = None
+    previous_elev = None
+
+    for point in coords:
+        if len(point) == 3:  # with elevation
+            lat, lon, elev = point
+        else:
+            lat, lon = point
+            elev = 0
+
+        if previous:
+            total_distance_km += geodesic((previous[0], previous[1]), (lat, lon)).km
+            if elev > previous_elev:
+                total_elevation_gain += elev - previous_elev
+
+        previous = (lat, lon)
+        previous_elev = elev
+
+    return round(total_distance_km, 1), round(total_elevation_gain)
+
+# Modify generate_route_summary to include it
+original_generate = generate_route_summary
+
+def generate_route_summary(route_url, access_token):
+    coords, route_id = fetch_route_coords_from_strava(route_url, access_token)
+    if not coords or not route_id:
+        return "📍 Could not load route data."
+
+    try:
+        # Distance and elevation
+        dist_km, elev_m = calculate_distance_and_elevation([(lat, lon) for lat, lon in coords])
+        dist_summary = f"{dist_km} km with {elev_m}m of elevation"
+
+        if route_id in cache:
+            pois = cache[route_id]
+        else:
+            sampled = sample_coords(coords)
+            pois = reverse_geocode_points(sampled)
+            cache[route_id] = pois
+            save_cache()
+
+        if pois:
+            return f"{dist_summary} – a few hills this week! 🔺\n🏞️ This route passes " + ", ".join(pois[:5]) + "."
+        else:
+            return f"{dist_summary} – a few hills this week! 🔺\n🏞️ This route explores some scenic areas."
+    except Exception as e:
+        print(f"Error generating route summary: {e}")
+        return "🏞️ Route summary unavailable."
