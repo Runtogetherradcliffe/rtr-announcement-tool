@@ -357,3 +357,110 @@ def generate_route_summary(route_url, access_token):
     except Exception as e:
         print(f"Error generating route summary: {e}")
         return "🏞️ Route summary unavailable."
+
+
+
+def fetch_route_coords_from_strava(route_url, access_token):
+    try:
+        route_id = route_url.strip("/").split("/")[-1]
+        print(f"🔍 Fetching route ID: {route_id}")
+        api_url = f"https://www.strava.com/api/v3/routes/{route_id}"
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = requests.get(api_url, headers=headers)
+        print(f"🔁 Strava API status: {response.status_code}")
+        if response.status_code != 200:
+            print(f"❌ Error response: {response.text}")
+        response.raise_for_status()
+        data = response.json()
+        polyline_str = data.get("map", {}).get("polyline")
+        if not polyline_str:
+            print("⚠️ No polyline found in route data.")
+            return [], route_id, 0
+        coords = polyline.decode(polyline_str)
+        elev_gain = round(data.get("elevation_gain", 0))
+        print(f"✅ Retrieved {len(coords)} coordinates, {elev_gain}m elevation.")
+        return coords, route_id, elev_gain
+    except Exception as e:
+        print(f"❌ Failed to fetch route: {e}")
+        return [], None, 0
+
+def generate_route_summary(route_url, access_token):
+    coords, route_id, elev_m = fetch_route_coords_from_strava(route_url, access_token)
+    if not coords or not route_id:
+        return "📍 Could not load route data."
+
+    try:
+        # Distance and elevation
+        dist_km = round(sum(
+            geodesic(coords[i], coords[i + 1]).km for i in range(len(coords) - 1)
+        ), 1)
+        elevation_msg = get_elevation_comment(elev_m)
+        dist_summary = f"{dist_km} km with {elev_m}m of elevation – {elevation_msg}"
+
+        if route_id in cache:
+            pois = cache[route_id]
+        else:
+            sampled = sample_coords(coords)
+            pois = reverse_geocode_points(sampled)
+            cache[route_id] = pois
+            save_cache()
+
+        if pois:
+            return f"{dist_summary}\n🏞️ This route passes " + ", ".join(pois[:5]) + "."
+        else:
+            return f"{dist_summary}\n🏞️ This route explores some scenic areas."
+    except Exception as e:
+        print(f"Error generating route summary: {e}")
+        return "🏞️ Route summary unavailable."
+
+
+
+def fetch_route_coords_from_strava(route_url, access_token):
+    try:
+        route_id = route_url.strip("/").split("/")[-1]
+        print(f"🔍 Fetching route ID: {route_id}")
+        api_url = f"https://www.strava.com/api/v3/routes/{route_id}"
+        headers = {"Authorization": f"Bearer {access_token}"}
+        response = requests.get(api_url, headers=headers)
+        print(f"🔁 Strava API status: {response.status_code}")
+        if response.status_code != 200:
+            print(f"❌ Error response: {response.text}")
+        response.raise_for_status()
+        data = response.json()
+        polyline_str = data.get("map", {}).get("polyline")
+        if not polyline_str:
+            print("⚠️ No polyline found in route data.")
+            return [], route_id, 0, 0
+        coords = polyline.decode(polyline_str)
+        elev_gain = round(data.get("elevation_gain", 0))
+        distance_km = round(data.get("distance", 0) / 1000, 1)
+        print(f"✅ Retrieved {len(coords)} coords, {distance_km} km, {elev_gain}m elevation.")
+        return coords, route_id, elev_gain, distance_km
+    except Exception as e:
+        print(f"❌ Failed to fetch route: {e}")
+        return [], None, 0, 0
+
+def generate_route_summary(route_url, access_token):
+    coords, route_id, elev_m, dist_km = fetch_route_coords_from_strava(route_url, access_token)
+    if not coords or not route_id:
+        return "📍 Could not load route data."
+
+    try:
+        elevation_msg = get_elevation_comment(elev_m)
+        dist_summary = f"{dist_km} km with {elev_m}m of elevation – {elevation_msg}"
+
+        if route_id in cache:
+            pois = cache[route_id]
+        else:
+            sampled = sample_coords(coords)
+            pois = reverse_geocode_points(sampled)
+            cache[route_id] = pois
+            save_cache()
+
+        if pois:
+            return f"{dist_summary}\n🏞️ This route passes " + ", ".join(pois[:5]) + "."
+        else:
+            return f"{dist_summary}\n🏞️ This route explores some scenic areas."
+    except Exception as e:
+        print(f"Error generating route summary: {e}")
+        return "🏞️ Route summary unavailable."
