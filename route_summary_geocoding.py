@@ -7,13 +7,13 @@ import json
 from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 from geopy.distance import geodesic
+import pandas as pd
+from datetime import datetime, timedelta
 
-# Updated POI priority list: prioritize parks and green spaces
 GEOCODE_FIELDS_PRIORITY = ["park", "leisure", "natural", "landuse", "road"]
 SAMPLE_DISTANCE_METERS = 800
 CACHE_FILE = "landmarks_cache.json"
 
-# Load or initialize cache
 try:
     with open(CACHE_FILE, "r") as f:
         cache = json.load(f)
@@ -62,6 +62,31 @@ def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
             accum_dist = 0
     return sampled
 
+def extract_poi_from_location(location):
+    if not location or "address" not in location.raw:
+        return None
+
+    address = location.raw.get("address", {})
+    namedetails = location.raw.get("namedetails", {})
+    poi_name = None
+
+    # 1. Prioritise leisure/park/green space
+    if location.raw.get("class") in ["leisure", "landuse", "natural"] and "name" in location.raw:
+        poi_name = location.raw["name"]
+
+    # 2. Namedetails fallback
+    elif "name" in namedetails:
+        poi_name = namedetails["name"]
+
+    # 3. Prioritised fields in address
+    else:
+        for key in GEOCODE_FIELDS_PRIORITY:
+            if key in address:
+                poi_name = address[key]
+                break
+
+    return poi_name
+
 def reverse_geocode_points(coords):
     geolocator = Nominatim(user_agent="run_group_app")
     geocode = RateLimiter(geolocator.reverse, min_delay_seconds=1)
@@ -70,13 +95,10 @@ def reverse_geocode_points(coords):
     for lat, lon in coords:
         try:
             location = geocode((lat, lon), exactly_one=True, timeout=10)
-            if location and "address" in location.raw:
-                for key in GEOCODE_FIELDS_PRIORITY:
-                    val = location.raw["address"].get(key)
-                    if val and val not in seen:
-                        pois.append(val)
-                        seen.add(val)
-                        break
+            name = extract_poi_from_location(location)
+            if name and name not in seen:
+                pois.append(name)
+                seen.add(name)
         except Exception as e:
             print(f"⚠️ Geocode error at ({lat}, {lon}): {e}")
             continue
@@ -98,8 +120,6 @@ def generate_route_summary(route_url, access_token):
         return "🏞️ This route passes " + ", ".join(pois[:5]) + "."
     else:
         return "🏞️ This route explores some scenic areas."
-
-import pandas as pd
 
 def extract_route_links_from_schedule(schedule_path, days_ahead=30):
     df = pd.read_excel(schedule_path)
