@@ -8,8 +8,8 @@ from geopy.geocoders import Nominatim
 from geopy.extra.rate_limiter import RateLimiter
 from geopy.distance import geodesic
 
-# Constants
-GEOCODE_FIELDS_PRIORITY = ["road", "park", "neighbourhood", "suburb"]
+# Updated POI priority list: prioritize parks and green spaces
+GEOCODE_FIELDS_PRIORITY = ["park", "leisure", "natural", "landuse", "road"]
 SAMPLE_DISTANCE_METERS = 800
 CACHE_FILE = "landmarks_cache.json"
 
@@ -65,20 +65,22 @@ def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
 def reverse_geocode_points(coords):
     geolocator = Nominatim(user_agent="run_group_app")
     geocode = RateLimiter(geolocator.reverse, min_delay_seconds=1)
-    pois = set()
+    pois = []
+    seen = set()
     for lat, lon in coords:
         try:
             location = geocode((lat, lon), exactly_one=True, timeout=10)
             if location and "address" in location.raw:
                 for key in GEOCODE_FIELDS_PRIORITY:
                     val = location.raw["address"].get(key)
-                    if val:
-                        pois.add(val)
+                    if val and val not in seen:
+                        pois.append(val)
+                        seen.add(val)
                         break
         except Exception as e:
             print(f"⚠️ Geocode error at ({lat}, {lon}): {e}")
             continue
-    return list(pois)
+    return pois
 
 def generate_route_summary(route_url, access_token):
     coords, route_id = fetch_route_coords_from_strava(route_url, access_token)
