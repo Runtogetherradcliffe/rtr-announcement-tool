@@ -1,7 +1,6 @@
-
 import requests
 import polyline
-from geopy.distance import geodesic
+import math
 
 # Constants
 GEOCODE_FIELDS_PRIORITY = ["road", "park", "neighbourhood", "suburb"]
@@ -53,6 +52,16 @@ def locationiq_reverse_geocode(lat, lon):
         print(f"⚠️ LocationIQ geocode error at ({lat}, {lon}): {e}")
         return None
 
+def haversine(coord1, coord2):
+    R = 6371000  # radius of Earth in meters
+    lat1, lon1 = map(math.radians, coord1)
+    lat2, lon2 = map(math.radians, coord2)
+    dlat = lat2 - lat1
+    dlon = lon2 - lon1
+    a = math.sin(dlat / 2)**2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlon / 2)**2
+    c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+    return R * c
+
 def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
     sampled = []
     if not coords:
@@ -61,7 +70,7 @@ def sample_coords(coords, sample_distance_m=SAMPLE_DISTANCE_METERS):
     sampled.append(last)
     accum_dist = 0
     for point in coords[1:]:
-        dist = geodesic(last, point).meters
+        dist = haversine(last, point)
         accum_dist += dist
         if accum_dist >= sample_distance_m:
             sampled.append(point)
