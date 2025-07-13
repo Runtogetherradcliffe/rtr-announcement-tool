@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import sys
 import os
-sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 from route_summary_geocoding import summarize_routes
 from strava_utils import fetch_strava_activities
