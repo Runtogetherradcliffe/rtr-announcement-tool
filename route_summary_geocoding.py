@@ -1,3 +1,4 @@
+
 import requests
 import polyline
 import os
@@ -7,7 +8,6 @@ GEOCODE_FIELDS_PRIORITY = ["neighbourhood", "suburb", "city_district", "city", "
 
 def locationiq_reverse_geocode(lat, lon):
     try:
-        response = requests.get(url, timeout=5)
         url = f"https://us1.locationiq.com/v1/reverse?key={LOCATIONIQ_API_KEY}&lat={lat}&lon={lon}&format=json"
         response = requests.get(url, timeout=5)
         response.raise_for_status()
@@ -35,7 +35,6 @@ def get_features_along_route(coords, distance_threshold=0.0015):
             "out center;"
         )
         try:
-        response = requests.get(url, timeout=5)
             response = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
             response.raise_for_status()
             data = response.json()
@@ -56,7 +55,6 @@ def summarize_routes(route_data_list):
         if not polyline_str:
             continue
         try:
-        response = requests.get(url, timeout=5)
             coords = polyline.decode(polyline_str)
             elev_gain = round(data.get("elevation_gain", 0))
             distance_km = round(data.get("distance", 0) / 1000, 1)
