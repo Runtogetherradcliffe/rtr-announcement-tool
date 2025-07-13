@@ -145,7 +145,6 @@ def fetch_route_coords_from_strava(route_url, access_token):
             print("⚠️ No polyline found in route data.")
             return [], route_id, 0, 0
         coords = polyline.decode(polyline_str)
-        diff --git a/route_summary_geocoding.py b/route_summary_geocoding.py
          elev_gain = round(data.get("elevation_gain", 0))
          distance_km = round(data.get("distance", 0) / 1000, 1)
          print(f"✅ Retrieved {len(coords)} coords, {distance_km} km, {elev_gain}m elevation.")
