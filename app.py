@@ -24,6 +24,15 @@ except Exception as e:
     st.stop()
 
 access_token = get_strava_access_token()
+
+# --- Diagnostics ---
+with st.expander("🔍 Token Diagnostics"):
+    token_info = get_strava_access_token(return_full_response=True)
+    st.json(token_info)
+
+    st.write("Token Scope:", token_info.get("scope"))
+    st.write("Expires at:", token_info.get("expires_at"))
+
 activities = fetch_strava_activities(access_token=access_token)
 st.write(f"✅ Found {len(activities)} activities.")
 

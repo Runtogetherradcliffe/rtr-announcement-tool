@@ -1,7 +1,7 @@
 import requests
 import streamlit as st
 
-def get_strava_access_token():
+def get_strava_access_token(return_full_response=False):
     client_id = st.secrets["client_id"]
     client_secret = st.secrets["client_secret"]
     refresh_token = st.secrets["refresh_token"]
@@ -15,9 +15,12 @@ def get_strava_access_token():
             "refresh_token": refresh_token
         }
     )
-
     response.raise_for_status()
-    return response.json()["access_token"]
+    token_data = response.json()
+
+    if return_full_response:
+        return token_data
+    return token_data["access_token"]
 
 def fetch_strava_activities(access_token, per_page=10):
     url = f"https://www.strava.com/api/v3/athlete/activities?per_page={per_page}"
