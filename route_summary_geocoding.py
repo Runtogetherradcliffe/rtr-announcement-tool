@@ -5,7 +5,8 @@ import math
 # Constants
 GEOCODE_FIELDS_PRIORITY = ["road", "park", "neighbourhood", "suburb"]
 SAMPLE_DISTANCE_METERS = 300
-LOCATIONIQ_API_KEY = "pk.c820b7e76f37159a448acc812ceefee1"
+import streamlit as st
+LOCATIONIQ_API_KEY = st.secrets["locationiq"]["api_key"]
 MAX_PARK_DISTANCE_METERS = 50
 
 # Cache structure (in memory or replace with persistent storage)
@@ -209,7 +210,8 @@ def summarize_routes(df, activities):
             if not route_link or "strava.com" not in route_link:
                 continue
 
-            coords = simulate_route_coords()  # Replace with real decoded coordinates
+            from strava_utils import fetch_route_coordinates
+            coords = fetch_route_coordinates(route_link)  # Replace with real decoded coordinates
 
             sampled_points = sample_points(coords, SAMPLE_DISTANCE_METERS)
 
@@ -243,7 +245,6 @@ def summarize_routes(df, activities):
 
     return summaries
 
-def simulate_route_coords():
     return [
         (53.5605, -2.3044),
         (53.5611, -2.3050),
