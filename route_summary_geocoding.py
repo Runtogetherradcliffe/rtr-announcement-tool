@@ -5,8 +5,7 @@ import math
 # Constants
 GEOCODE_FIELDS_PRIORITY = ["road", "park", "neighbourhood", "suburb"]
 SAMPLE_DISTANCE_METERS = 300
-import streamlit as st
-LOCATIONIQ_API_KEY = st.secrets["locationiq"]["api_key"]
+LOCATIONIQ_API_KEY = "pk.c820b7e76f37159a448acc812ceefee1"
 MAX_PARK_DISTANCE_METERS = 50
 
 # Cache structure (in memory or replace with persistent storage)
@@ -147,10 +146,6 @@ def fetch_route_coords_from_strava(route_url, access_token):
             return [], route_id, 0, 0
         coords = polyline.decode(polyline_str)
         diff --git a/route_summary_geocoding.py b/route_summary_geocoding.py
-index e95bdb3752e47979fa5c8cd72695d1ffb962b0e9..119dcdec3ede31d546ab9c311e39c8a1f7279b37 100644
---- a/route_summary_geocoding.py
-+++ b/route_summary_geocoding.py
-@@ -148,33 +148,37 @@ def fetch_route_coords_from_strava(route_url, access_token):
          elev_gain = round(data.get("elevation_gain", 0))
          distance_km = round(data.get("distance", 0) / 1000, 1)
          print(f"✅ Retrieved {len(coords)} coords, {distance_km} km, {elev_gain}m elevation.")
@@ -192,83 +187,3 @@ index e95bdb3752e47979fa5c8cd72695d1ffb962b0e9..119dcdec3ede31d546ab9c311e39c8a1
      except Exception as e:
          print(f"Error generating route summary: {e}")
          return "🏞️ Route summary unavailable."
-
-from geopy.distance import geodesic
-from route_summary_geocoding import locationiq_reverse_geocode, query_parks_in_bbox
-import polyline
-
-SAMPLE_DISTANCE_METERS = 300
-MAX_PARK_DISTANCE_METERS = 50
-
-def summarize_routes(df, activities):
-    summaries = []
-
-    for _, row in df.iterrows():
-        for dist in ['8k', '5k']:
-            route_name = row.get(f"{dist} Route", "Unnamed Route")
-            route_link = row.get(f"{dist} Strava link", "")
-            if not route_link or "strava.com" not in route_link:
-                continue
-
-            from strava_utils import fetch_route_coordinates
-            coords = fetch_route_coordinates(route_link)  # Replace with real decoded coordinates
-
-            sampled_points = sample_points(coords, SAMPLE_DISTANCE_METERS)
-
-            # Overpass park query in bounding box
-            parks = query_parks_in_bbox(coords)
-
-            # Filter only parks that lie near the route
-            parks_on_route = []
-            for name, (plat, plon) in parks:
-                for route_point in sampled_points:
-                    if geodesic((plat, plon), route_point).meters <= MAX_PARK_DISTANCE_METERS:
-                        parks_on_route.append(name)
-                        break
-
-            # Also enrich with LocationIQ names (lower priority)
-            enriched = []
-            for lat, lon in sampled_points:
-                name = locationiq_reverse_geocode(lat, lon)
-                if name and name not in parks_on_route and name not in enriched:
-                    enriched.append(name)
-
-            place_names = parks_on_route + enriched
-            terrain = "gently undulating 🌿"
-            dist_km = estimate_distance_km()
-            elevation_m = estimate_elevation()
-
-            summary = f"""• {dist} – {route_name}: {route_link}
-  {dist_km:.1f} km with {elevation_m}m of elevation – {terrain}
-  🏞️ This route passes {', '.join(place_names)}."""
-            summaries.append(summary)
-
-    return summaries
-
-    return [
-        (53.5605, -2.3044),
-        (53.5611, -2.3050),
-        (53.5620, -2.3060),
-        (53.5630, -2.3070),
-        (53.5640, -2.3080),
-        (53.5650, -2.3090),
-    ]
-
-def sample_points(coords, interval_m=300):
-    if not coords:
-        return []
-    sampled = [coords[0]]
-    dist = 0
-    for i in range(1, len(coords)):
-        d = geodesic(coords[i - 1], coords[i]).meters
-        dist += d
-        if dist >= interval_m:
-            sampled.append(coords[i])
-            dist = 0
-    return sampled
-
-def estimate_distance_km(coords=None):
-    return 8.7
-
-def estimate_elevation():
-    return 38
