@@ -1,8 +1,8 @@
+
 import streamlit as st
 import pandas as pd
-import sys
 import os
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import sys
 
 from route_summary_geocoding import summarize_routes
 from strava_utils import fetch_strava_activities
@@ -10,28 +10,26 @@ from strava_utils import fetch_strava_activities
 st.set_page_config(page_title="RunTogether Route Announcements", layout="wide")
 
 @st.cache_data
-def load_excel(file):
-    return pd.read_excel(file, engine="openpyxl")
+def load_schedule():
+    path = os.path.join(os.path.dirname(__file__), "RTR route schedule.xlsx")
+    df = pd.read_excel(path, engine="openpyxl")
+    return df
 
-st.title("🏃‍♀️ RunTogether Route Announcement Tool")
+st.title("🏃‍♀️ RunTogether Route Announcements")
 
-uploaded = st.file_uploader("Upload the RTR route schedule Excel file", type="xlsx")
-if uploaded:
-    df = load_excel(uploaded)
+try:
+    df_schedule = load_schedule()
+    st.success("✅ Loaded schedule from local file.")
+except Exception as e:
+    st.error(f"❌ Failed to load route schedule: {e}")
+    st.stop()
 
-    today = pd.to_datetime("today").normalize()
-    df["2025 Date"] = pd.to_datetime(df["2025 Date"])
-    upcoming = df[df["2025 Date"] >= today].sort_values("2025 Date").head(1)
+strava_token = st.secrets["STRAVA_ACCESS_TOKEN"]
 
-    if not upcoming.empty:
-        st.subheader(f"📅 Next run: {upcoming.iloc[0]['2025 Date'].date()}")
-        with st.spinner("Fetching Strava activities..."):
-            activities = fetch_strava_activities(access_token='YOUR_TOKEN')
-        with st.spinner("Generating route summary..."):
-            summary = summarize_routes(upcoming, activities)
-        for s in summary:
-            st.markdown(s)
-    else:
-        st.warning("No upcoming dates found in the spreadsheet.")
-else:
-    st.info("Please upload the route schedule to begin.")
+activities = fetch_strava_activities(access_token=strava_token)
+st.write(f"✅ Found {len(activities)} activities.")
+
+route_summaries = summarize_routes(df_schedule, strava_token)
+st.write("✅ Route summaries generated:")
+for summary in route_summaries:
+    st.markdown(summary)
