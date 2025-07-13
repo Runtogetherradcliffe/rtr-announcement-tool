@@ -3,5 +3,5 @@ requests
 polyline
 gpxpy
 openpyxl
-
+geopy==2.4.0
 
