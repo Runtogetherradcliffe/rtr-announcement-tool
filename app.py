@@ -27,7 +27,7 @@ access_token = get_strava_access_token()
 activities = fetch_strava_activities(access_token=access_token)
 st.write(f"✅ Found {len(activities)} activities.")
 
-route_summaries = summarize_routes(df_schedule)
+route_summaries = summarize_routes(activities)
 st.write("✅ Route summaries generated:")
 for summary in route_summaries:
     st.markdown(summary)
