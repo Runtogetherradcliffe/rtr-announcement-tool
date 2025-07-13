@@ -30,35 +30,35 @@ def query_parks_in_bbox(coords):
     """
 
     try:
-        response = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
-        response.raise_for_status()
-        data = response.json()
-        parks = []
-        for element in data.get("elements", []):
-            tags = element.get("tags", {})
-            name = tags.get("name")
-            center = element.get("center")
-            if name and center:
-                parks.append((name, (center["lat"], center["lon"])))
-        return parks
+    response = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
+    response.raise_for_status()
+    data = response.json()
+    parks = []
+    for element in data.get("elements", []):
+    tags = element.get("tags", {})
+    name = tags.get("name")
+    center = element.get("center")
+    if name and center:
+    parks.append((name, (center["lat"], center["lon"])))
+    return parks
     except Exception as e:
         print(f"❌ Overpass API (bbox) error: {e}")
         return []
 
 def locationiq_reverse_geocode(lat, lon):
     try:
-        url = f"https://us1.locationiq.com/v1/reverse?key={LOCATIONIQ_API_KEY}&lat={lat}&lon={lon}&format=json"
-        response = requests.get(url, timeout=5)
-        response.raise_for_status()
-        data = response.json()
-        address = data.get("address", {})
-        display_name = data.get("display_name", "")
-        for field in GEOCODE_FIELDS_PRIORITY:
-            if field in address:
-                return address[field]
-        if "," in display_name:
-            return display_name.split(",")[0]
-        return None
+    url = f"https://us1.locationiq.com/v1/reverse?key={LOCATIONIQ_API_KEY}&lat={lat}&lon={lon}&format=json"
+    response = requests.get(url, timeout=5)
+    response.raise_for_status()
+    data = response.json()
+    address = data.get("address", {})
+    display_name = data.get("display_name", "")
+    for field in GEOCODE_FIELDS_PRIORITY:
+    if field in address:
+    return address[field]
+    if "," in display_name:
+    return display_name.split(",")[0]
+    return None
     except Exception as e:
         print(f"⚠️ LocationIQ geocode error at ({lat}, {lon}): {e}")
         return None
@@ -130,25 +130,26 @@ def save_cache():
 
 def fetch_route_coords_from_strava(route_url, access_token):
     try:
-        route_id = route_url.strip("/").split("/")[-1]
-        print(f"🔍 Fetching route ID: {route_id}")
-        api_url = f"https://www.strava.com/api/v3/routes/{route_id}"
-        headers = {"Authorization": f"Bearer {access_token}"}
-        response = requests.get(api_url, headers=headers)
-        print(f"🔁 Strava API status: {response.status_code}")
-        if response.status_code != 200:
-            print(f"❌ Error response: {response.text}")
-        response.raise_for_status()
-        data = response.json()
-        polyline_str = data.get("map", {}).get("polyline")
-        if not polyline_str:
-            print("⚠️ No polyline found in route data.")
-            return [], route_id, 0, 0
-        coords = polyline.decode(polyline_str)
-         elev_gain = round(data.get("elevation_gain", 0))
-         distance_km = round(data.get("distance", 0) / 1000, 1)
-         print(f"✅ Retrieved {len(coords)} coords, {distance_km} km, {elev_gain}m elevation.")
-         return coords, route_id, elev_gain, distance_km
+    route_id = route_url.strip("/").split("/")[-1]
+    print(f"🔍 Fetching route ID: {route_id}")
+    api_url = f"https://www.strava.com/api/v3/routes/{route_id}"
+    headers = {"Authorization": f"Bearer {access_token}"}
+    response = requests.get(api_url, headers=headers)
+    print(f"🔁 Strava API status: {response.status_code}")
+    if response.status_code != 200:
+    print(f"❌ Error response: {response.text}")
+    response.raise_for_status()
+    data = response.json()
+    polyline_str = data.get("map", {}).get("polyline")
+    if not polyline_str:
+    print("⚠️ No polyline found in route data.")
+    return [], route_id, 0, 0
+    coords = polyline.decode(polyline_str)
+    diff --git a/route_summary_geocoding.py b/route_summary_geocoding.py
+    elev_gain = round(data.get("elevation_gain", 0))
+    distance_km = round(data.get("distance", 0) / 1000, 1)
+    print(f"✅ Retrieved {len(coords)} coords, {distance_km} km, {elev_gain}m elevation.")
+    return coords, route_id, elev_gain, distance_km
      except Exception as e:
          print(f"❌ Failed to fetch route: {e}")
          return [], None, 0, 0
@@ -159,30 +160,30 @@ def fetch_route_coords_from_strava(route_url, access_token):
          return "📍 Could not load route data."
  
      try:
-         elevation_msg = get_elevation_comment(elev_m)
-         dist_summary = f"{dist_km} km with {elev_m}m of elevation – {elevation_msg}"
- 
-         if route_id in cache:
-             pois = cache[route_id]
-         else:
-             pois = reverse_geocode_points(coords)
-             cache[route_id] = pois
-             save_cache()
- 
-         if pois:
--            return f"{dist_summary}
--🏞️ This route passes " + ", ".join(pois[:5]) + "."
-+            return (
-+                f"{dist_summary}\n"
-+                "🏞️ This route passes " + ", ".join(pois[:5]) + "."
-+            )
-         else:
--            return f"{dist_summary}
--🏞️ This route explores some scenic areas."
-+            return (
-+                f"{dist_summary}\n"
-+                "🏞️ This route explores some scenic areas."
-+            )
+    elevation_msg = get_elevation_comment(elev_m)
+    dist_summary = f"{dist_km} km with {elev_m}m of elevation – {elevation_msg}"
+    
+    if route_id in cache:
+    pois = cache[route_id]
+    else:
+    pois = reverse_geocode_points(coords)
+    cache[route_id] = pois
+    save_cache()
+    
+    if pois:
+    -            return f"{dist_summary}
+    -🏞️ This route passes " + ", ".join(pois[:5]) + "."
+    +            return (
+    +                f"{dist_summary}\n"
+    +                "🏞️ This route passes " + ", ".join(pois[:5]) + "."
+    +            )
+    else:
+    -            return f"{dist_summary}
+    -🏞️ This route explores some scenic areas."
+    +            return (
+    +                f"{dist_summary}\n"
+    +                "🏞️ This route explores some scenic areas."
+    +            )
      except Exception as e:
          print(f"Error generating route summary: {e}")
          return "🏞️ Route summary unavailable."
