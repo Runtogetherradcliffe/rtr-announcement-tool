@@ -32,7 +32,7 @@ def query_parks_in_bbox(coords):
 try:
     response = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
     response.raise_for_status()
-    except Exception as e:
+except Exception as e:
         print(f"❌ Overpass API (bbox) error: {e}")
         return []
 
@@ -50,7 +50,7 @@ def locationiq_reverse_geocode(lat, lon):
     if "," in display_name:
     return display_name.split(",")[0]
     return None
-    except Exception as e:
+except Exception as e:
         print(f"⚠️ LocationIQ geocode error at ({lat}, {lon}): {e}")
         return None
 
@@ -141,7 +141,7 @@ def fetch_route_coords_from_strava(route_url, access_token):
     distance_km = round(data.get("distance", 0) / 1000, 1)
     print(f"✅ Retrieved {len(coords)} coords, {distance_km} km, {elev_gain}m elevation.")
     return coords, route_id, elev_gain, distance_km
-     except Exception as e:
+except Exception as e:
          print(f"❌ Failed to fetch route: {e}")
          return [], None, 0, 0
  
@@ -175,7 +175,7 @@ def fetch_route_coords_from_strava(route_url, access_token):
     +                f"{dist_summary}\n"
     +                "🏞️ This route explores some scenic areas."
     +            )
-     except Exception as e:
+except Exception as e:
          print(f"Error generating route summary: {e}")
          return "🏞️ Route summary unavailable."
 
