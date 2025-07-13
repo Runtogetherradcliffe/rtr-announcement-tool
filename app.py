@@ -1,32 +1,68 @@
-
 import streamlit as st
 import pandas as pd
-from strava_utils import fetch_strava_activities
-from route_summary_geocoding import summarize_routes
+import sys
 
-st.set_page_config(page_title="RTR Route Announcement Tool")
+from route_summary_geocoding import generate_route_summary
+from strava_utils import fetch_strava_activities  # Assuming this is the right function name
 
-st.title("Run Together Radcliffe - Route Announcement Tool")
+st.set_page_config(page_title="RunTogether Route Announcements", layout="wide")
 
-uploaded_file = st.file_uploader("Upload RTR Route Schedule (Excel)", type=["xlsx"])
+@st.cache_data
+def load_data():
+    df = pd.read_excel("RTR route schedule.xlsx")
+    df["2025 Date"] = pd.to_datetime(df["2025 Date"]).dt.date
+    return df
 
-if uploaded_file:
+def get_upcoming_runs(df, num_weeks=1):
+    from datetime import date, timedelta
+    today = date.today()
+    max_date = today + timedelta(weeks=num_weeks)
+    return df[(df["2025 Date"] >= today) & (df["2025 Date"] <= max_date)]
+
+def main():
+    st.title("🏃 RunTogether Announcement Generator")
+
     try:
-        df = pd.read_excel(uploaded_file)
-        st.success("File uploaded successfully.")
-
-        st.subheader("Schedule Preview")
-        st.dataframe(df)
-
-        st.subheader("Fetching Strava Activities...")
-        strava_activities = fetch_strava_activities()
-        st.success(f"Fetched {len(strava_activities)} activities.")
-
-        st.subheader("Summarizing Routes")
-        summary_df = summarize_routes(df, strava_activities)
-        st.dataframe(summary_df)
-
+        df = load_data()
     except Exception as e:
-        st.error(f"Error processing file: {e}")
-else:
-    st.info("Please upload an Excel schedule file.")
+        st.error(f"Failed to load Excel: {e}")
+        return
+
+    try:
+        access_token = "FAKE_TOKEN"  # Placeholder
+        activities = fetch_strava_activities()
+    except Exception as e:
+        st.warning(f"Could not fetch Strava activities: {e}")
+        activities = []
+
+    try:
+        upcoming = get_upcoming_runs(df)
+    except Exception as e:
+        st.error(f"Failed to filter upcoming runs: {e}")
+        return
+
+    if upcoming.empty:
+        st.info("No upcoming runs found in the schedule.")
+        return
+
+    st.subheader("📅 Upcoming Run Info")
+    st.dataframe(upcoming)
+
+    st.subheader("📝 Route Summary")
+    try:
+        summary = generate_route_summary(upcoming, activities)
+        st.dataframe(summary)
+    except Exception as e:
+        st.error(f"Failed to generate route summary: {e}")
+        return
+
+    st.subheader("📢 Announcement Text")
+    messages = []
+    for _, row in upcoming.iterrows():
+        line = f"{row['2025 Date']} - Meet at {row['Meeting point']} for {row['8k Route']} and {row['5k Route']}."
+        messages.append(f"{line}")
+    announcement_text = "\n".join(messages)
+    st.code(announcement_text, language="markdown")
+
+if __name__ == "__main__":
+    main()
