@@ -29,18 +29,9 @@ def query_parks_in_bbox(coords):
     out tags center;
     """
 
-    try:
+try:
     response = requests.post("https://overpass-api.de/api/interpreter", data={"data": query})
     response.raise_for_status()
-    data = response.json()
-    parks = []
-    for element in data.get("elements", []):
-    tags = element.get("tags", {})
-    name = tags.get("name")
-    center = element.get("center")
-    if name and center:
-    parks.append((name, (center["lat"], center["lon"])))
-    return parks
     except Exception as e:
         print(f"❌ Overpass API (bbox) error: {e}")
         return []
