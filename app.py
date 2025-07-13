@@ -2,7 +2,7 @@ import streamlit as st
 import pandas as pd
 import sys
 
-from route_summary_geocoding import generate_route_summary
+from route_summary_geocoding import summarize_routes
 from strava_utils import fetch_strava_activities  # Assuming this is the right function name
 
 st.set_page_config(page_title="RunTogether Route Announcements", layout="wide")
@@ -50,7 +50,7 @@ def main():
 
     st.subheader("📝 Route Summary")
     try:
-        summary = generate_route_summary(upcoming, activities)
+        summary = summarize_routes(upcoming, activities)
         st.dataframe(summary)
     except Exception as e:
         st.error(f"Failed to generate route summary: {e}")
