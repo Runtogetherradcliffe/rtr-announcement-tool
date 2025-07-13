@@ -178,3 +178,7 @@ def fetch_route_coords_from_strava(route_url, access_token):
      except Exception as e:
          print(f"Error generating route summary: {e}")
          return "🏞️ Route summary unavailable."
+
+
+def summarize_routes():
+    return []
