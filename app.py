@@ -26,7 +26,7 @@ if uploaded:
     if not upcoming.empty:
         st.subheader(f"📅 Next run: {upcoming.iloc[0]['2025 Date'].date()}")
         with st.spinner("Fetching Strava activities..."):
-            activities = fetch_strava_activities()
+            activities = fetch_strava_activities(access_token='YOUR_TOKEN')
         with st.spinner("Generating route summary..."):
             summary = summarize_routes(upcoming, activities)
         for s in summary:
